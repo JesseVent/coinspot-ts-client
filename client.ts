@@ -284,7 +284,7 @@ class CoinspotTransport {
 
     async post<T>(
         url: string,
-        body: Record<string, unknown>,
+        body: object,
         headers: Record<string, string>,
         schema: (typeof schemas)[keyof typeof schemas]
     ): Promise<T> {
@@ -300,7 +300,7 @@ class CoinspotTransport {
     private async retryableRequest<T>(
         method: HttpMethod,
         url: string,
-        body: Record<string, unknown> | undefined,
+        body: object | undefined,
         headers: Record<string, string>,
         schema: (typeof schemas)[keyof typeof schemas]
     ): Promise<T> {
@@ -336,7 +336,7 @@ class CoinspotTransport {
     private async execute<T>(
         method: HttpMethod,
         url: string,
-        body: Record<string, unknown> | undefined,
+        body: object | undefined,
         headers: Record<string, string>,
         schema: (typeof schemas)[keyof typeof schemas]
     ): Promise<T> {
@@ -609,7 +609,7 @@ export class CoinspotFullAccessApi {
 
     private async post<T>(
         path: string,
-        body: Record<string, unknown>,
+        body: object,
         schema: (typeof schemas)[keyof typeof schemas]
     ): Promise<T> {
         const credential = this.ensureAuth();
@@ -765,7 +765,7 @@ export class CoinspotReadOnlyApi {
 
     private async post<T>(
         path: string,
-        body: Record<string, unknown>,
+        body: object,
         schema: (typeof schemas)[keyof typeof schemas]
     ): Promise<T> {
         const credential = this.ensureAuth();

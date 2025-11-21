@@ -1,0 +1,39 @@
+{
+  "name": "coinspot-ts-client",
+  "version": "1.0.0",
+  "description": "Modern TypeScript client for the CoinSpot v2 API with retries, rate limiting, and zod validation.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "keywords": [
+    "coinspot",
+    "crypto",
+    "api-client",
+    "typescript",
+    "zod"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JesseVent/coinspot-ts-client.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "compile": "tsc --noEmit",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "prepare": "npm run build",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.9",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2"
+  }
+}
