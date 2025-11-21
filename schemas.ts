@@ -8,10 +8,19 @@ const statusMessageSchema = statusBaseSchema.extend({
     message: z.string().optional(),
 });
 
+const numLike = z.preprocess((val) => {
+    if (val === 'NaN') return null;
+    if (typeof val === 'string') {
+        const n = Number(val);
+        return Number.isNaN(n) ? val : n;
+    }
+    return val;
+}, z.number().nullable());
+
 const pricePointSchema = z.object({
-    bid: z.number(),
-    ask: z.number(),
-    last: z.number(),
+    bid: numLike,
+    ask: numLike,
+    last: numLike.optional(),
 });
 
 const orderBookEntrySchema = z.object({
@@ -82,7 +91,7 @@ export const schemas = {
         prices: pricePointSchema,
     }),
     latestRate: statusMessageSchema.extend({
-        rate: z.number(),
+        rate: numLike,
         market: z.string(),
     }),
     orderBook: statusMessageSchema.extend({

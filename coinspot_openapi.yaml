@@ -1,0 +1,1096 @@
+openapi: 3.0.3
+info:
+  title: CoinSpot v2 API (Pragmatic Spec)
+  version: "0.1.0"
+  description: |
+    Pragmatic OpenAPI description for CoinSpot v2 based on public docs and live probes.
+    Notes:
+    - Public price fields may be strings or numbers (and sometimes "NaN" for illiquid pairs); schema uses oneOf.
+    - Non-AUD market paths are case-sensitive; use lowercase (e.g., `usdt`).
+    - Private/RO calls require `key` and `sign` headers and a `nonce` in the JSON body.
+servers:
+  - url: https://www.coinspot.com.au/pubapi/v2
+    description: Public (no auth) – latest returns prices for every coin and market plus public order books.
+  - url: https://www.coinspot.com.au/api/v2
+    description: Full access (auth required) – requires key/sign/nonce for trading, quotes, withdrawals, and status checks.
+  - url: https://www.coinspot.com.au/api/v2/ro
+    description: Read-only (auth required) – requires key/sign/nonce for balance, history, and affiliate/referral data.
+components:
+  securitySchemes:
+    CoinspotKey:
+      type: apiKey
+      in: header
+      name: key
+      description: API key from settings
+    CoinspotSign:
+      type: apiKey
+      in: header
+      name: sign
+      description: HMAC-SHA512 of POST body using API secret
+  schemas:
+    Status:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+    StatusMessage:
+      allOf:
+        - $ref: '#/components/schemas/Status'
+        - type: object
+          properties:
+            message:
+              type: string
+              example: ok
+    NumLike:
+      oneOf:
+        - type: number
+        - type: string
+      example: "129051.79"
+    PricePoint:
+      type: object
+      properties:
+        bid:
+          $ref: '#/components/schemas/NumLike'
+        ask:
+          $ref: '#/components/schemas/NumLike'
+        last:
+          $ref: '#/components/schemas/NumLike'
+    PublicPrices:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            prices:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/PricePoint'
+    PublicPriceSingle:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            prices:
+              $ref: '#/components/schemas/PricePoint'
+    LatestRate:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            rate:
+              $ref: '#/components/schemas/NumLike'
+            market:
+              type: string
+              example: BTC/AUD
+    OrderBookEntry:
+      type: object
+      properties:
+        amount:
+          type: number
+        rate:
+          type: number
+        total:
+          type: number
+        coin:
+          type: string
+        market:
+          type: string
+      example:
+        amount: 0.5
+        rate: 130000
+        total: 65000
+        coin: BTC
+        market: BTC/AUD
+    OrderBook:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            buyorders:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderBookEntry'
+            sellorders:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderBookEntry'
+    CompletedOrder:
+      allOf:
+        - $ref: '#/components/schemas/OrderBookEntry'
+        - type: object
+          properties:
+            solddate:
+              type: string
+              format: date-time
+            type:
+              type: string
+            otc:
+              type: boolean
+            audfeeExGst:
+              type: number
+            audGst:
+              type: number
+            audtotal:
+              type: number
+    CompletedOrders:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            buyorders:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompletedOrder'
+            sellorders:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompletedOrder'
+    DepositAddresses:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            networks:
+              type: array
+              items:
+                type: object
+                properties:
+                  name: { type: string }
+                  network: { type: string }
+                  address: { type: string }
+                  memo: { type: string }
+    Quote:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            rate:
+              type: number
+              example: 130000
+    PlacedOrder:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            coin: { type: string }
+            market: { type: string }
+            amount: { type: number }
+            rate: { type: number }
+            id: { type: string }
+    Execution:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            coin: { type: string }
+            amount: { type: number }
+            market: { type: string }
+            total: { type: number }
+            rate: { type: number }
+    CancelResponse:
+      $ref: '#/components/schemas/StatusMessage'
+    Balances:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            balances:
+              type: array
+              items:
+                type: object
+                properties:
+                  coin: { type: string }
+                  balance: { type: number }
+                  available: { type: number }
+                  audbalance: { type: number }
+                  rate: { type: number }
+    MyOrder:
+      type: object
+      properties:
+        id: { type: string }
+        coin: { type: string }
+        market: { type: string }
+        amount: { type: number }
+        rate: { type: number }
+        total: { type: number }
+        created: { type: string, format: date-time }
+    MyOpenOrders:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            buyorders:
+              type: array
+              items: { $ref: '#/components/schemas/MyOrder' }
+            sellorders:
+              type: array
+              items: { $ref: '#/components/schemas/MyOrder' }
+    MyHistory:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            buyorders:
+              type: array
+              items: { $ref: '#/components/schemas/CompletedOrder' }
+            sellorders:
+              type: array
+              items: { $ref: '#/components/schemas/CompletedOrder' }
+    SendReceiveHistory:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            sendtransactions:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp: { type: string, format: date-time }
+                  amount: { type: number }
+                  coin: { type: string }
+                  address: { type: string }
+                  aud: { type: number }
+                  sendfee: { type: number }
+            receivetransactions:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp: { type: string, format: date-time }
+                  amount: { type: number }
+                  coin: { type: string }
+                  address: { type: string }
+                  aud: { type: number }
+                  from: { type: string }
+    DepositHistory:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            deposits:
+              type: array
+              items:
+                type: object
+                properties:
+                  amount: { type: number }
+                  created: { type: string }
+                  status: { type: string }
+                  type: { type: string }
+                  reference: { type: string }
+    WithdrawalHistory:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            withdrawals:
+              type: array
+              items:
+                type: object
+                properties:
+                  amount: { type: number }
+                  created: { type: string }
+                  status: { type: string }
+    PaymentHistory:
+      allOf:
+        - $ref: '#/components/schemas/StatusMessage'
+        - type: object
+          properties:
+            payments:
+              type: array
+              items:
+                type: object
+                properties:
+                  amount: { type: number }
+                  coin: { type: string }
+                  audamount: { type: number }
+                  timestamp: { type: string }
+paths:
+  /latest:
+    get:
+      summary: Latest prices for all coins and markets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPrices'
+              examples:
+                sample:
+                  value:
+                    status: ok
+                    prices:
+                      btc: { bid: "129051.79", ask: "129966.15", last: "130487.3453" }
+                      btc_usdt: { bid: "75000.01", ask: "89009.15", last: "80000" }
+  /latest/{cointype}:
+    get:
+      summary: Latest price for a specific coin in AUD
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPriceSingle'
+  /latest/{cointype}/{markettype}:
+    get:
+      summary: Latest price for a coin/market pair
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+        - name: markettype
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPriceSingle'
+  /buyprice/{cointype}:
+    get:
+      summary: Latest buy price for a coin in AUD
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestRate'
+  /sellprice/{cointype}:
+    get:
+      summary: Latest sell price for a coin in AUD
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestRate'
+  /orders/open/{cointype}:
+    get:
+      summary: Top buy/sell book for a coin in AUD
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBook'
+  /orders/completed/{cointype}:
+    get:
+      summary: Recently completed orders for a coin in AUD
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompletedOrders'
+
+  # Full access (auth, POST)
+  /status:
+    post:
+      summary: Full-access API status heartbeat
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+  /my/coin/deposit:
+    post:
+      summary: Deposit addresses for a coin
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositAddresses'
+  /quote/buy/now:
+    post:
+      summary: Quote for an instant buy
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amount]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amount: { type: number }
+                amounttype:
+                  type: string
+                  enum: [coin, aud]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+  /quote/sell/now:
+    post:
+      summary: Quote for an instant sell
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amount]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amount: { type: number }
+                amounttype:
+                  type: string
+                  enum: [coin, aud]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+  /quote/swap/now:
+    post:
+      summary: Quote for an instant swap
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointypesell, cointypebuy, amount]
+              properties:
+                nonce: { type: integer }
+                cointypesell: { type: string }
+                cointypebuy: { type: string }
+                amount: { type: number }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+  /my/buy:
+    post:
+      summary: Place a market buy order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amount, rate]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amount: { type: number }
+                rate: { type: number }
+                markettype: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacedOrder'
+  /my/sell:
+    post:
+      summary: Place a market sell order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amount, rate]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amount: { type: number }
+                rate: { type: number }
+                markettype: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacedOrder'
+  /my/buy/edit:
+    post:
+      summary: Edit an open buy order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, id, rate, newrate]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                id: { type: string }
+                rate: { type: number }
+                newrate: { type: number }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacedOrder'
+  /my/sell/edit:
+    post:
+      summary: Edit an open sell order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, id, rate, newrate]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                id: { type: string }
+                rate: { type: number }
+                newrate: { type: number }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacedOrder'
+  /my/buy/now:
+    post:
+      summary: Execute a buy-now order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amounttype, amount]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amounttype: { type: string, enum: [coin, aud] }
+                amount: { type: number }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Execution'
+  /my/sell/now:
+    post:
+      summary: Execute a sell-now order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amounttype, amount]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amounttype: { type: string, enum: [coin, aud] }
+                amount: { type: number }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Execution'
+  /my/swap/now:
+    post:
+      summary: Execute a swap-now order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointypesell, cointypebuy, amount]
+              properties:
+                nonce: { type: integer }
+                cointypesell: { type: string }
+                cointypebuy: { type: string }
+                amount: { type: number }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Execution'
+  /my/buy/cancel:
+    post:
+      summary: Cancel a market buy order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, id]
+              properties:
+                nonce: { type: integer }
+                id: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+  /my/buy/cancel/all:
+    post:
+      summary: Cancel all buy orders (optional coin)
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                coin: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+  /my/sell/cancel:
+    post:
+      summary: Cancel a market sell order
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, id]
+              properties:
+                nonce: { type: integer }
+                id: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+  /my/sell/cancel/all:
+    post:
+      summary: Cancel all sell orders (optional coin)
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                coin: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+  /my/coin/withdraw/senddetails:
+    post:
+      summary: Withdrawal network/payment details
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusMessage'
+  /my/coin/withdraw/send:
+    post:
+      summary: Send a coin withdrawal
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nonce, cointype, amount, address]
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                amount: { type: number }
+                address: { type: string }
+                memo: { type: string }
+                network: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusMessage'
+
+  # Read-only (auth, POST)
+  /my/balances:
+    post:
+      summary: List all coin balances
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balances'
+  /my/balance/{cointype}:
+    post:
+      summary: Balance for a specific coin
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      parameters:
+        - name: cointype
+          in: path
+          required: true
+          schema: { type: string }
+        - name: available
+          in: query
+          schema:
+            type: string
+            enum: [yes, no]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusMessage'
+  /my/orders/market/open:
+    post:
+      summary: List my open market orders
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                markettype: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyOpenOrders'
+  /my/orders/limit/open:
+    post:
+      summary: List my open limit orders
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyOpenOrders'
+  /my/orders/completed:
+    post:
+      summary: List completed order history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                markettype: { type: string }
+                startdate: { type: string }
+                enddate: { type: string }
+                limit: { type: integer, default: 200 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyHistory'
+  /my/orders/market/completed:
+    post:
+      summary: List completed market order history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                cointype: { type: string }
+                markettype: { type: string }
+                startdate: { type: string }
+                enddate: { type: string }
+                limit: { type: integer, default: 200 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyHistory'
+  /my/sendreceive:
+    post:
+      summary: Send & receive history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                startdate: { type: string }
+                enddate: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendReceiveHistory'
+  /my/deposits:
+    post:
+      summary: AUD deposit history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                startdate: { type: string }
+                enddate: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositHistory'
+  /my/withdrawals:
+    post:
+      summary: AUD withdrawal history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+                startdate: { type: string }
+                enddate: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithdrawalHistory'
+  /my/affiliatepayments:
+    post:
+      summary: Affiliate payment history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentHistory'
+  /my/referralpayments:
+    post:
+      summary: Referral payment history
+      security:
+        - CoinspotKey: []
+          CoinspotSign: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentHistory'
