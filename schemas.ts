@@ -8,25 +8,29 @@ const statusMessageSchema = statusBaseSchema.extend({
     message: z.string().optional(),
 });
 
-const numLike = z.preprocess((val) => {
-    if (val === 'NaN') return null;
-    if (typeof val === 'string') {
-        const n = Number(val);
-        return Number.isNaN(n) ? val : n;
-    }
-    return val;
-}, z.number().nullable());
+const coerceNumber = <T extends z.ZodTypeAny>(schema: T) =>
+    z.preprocess((val) => {
+        if (val === 'NaN') return null;
+        if (typeof val === 'string') {
+            const n = Number(val);
+            return Number.isNaN(n) ? val : n;
+        }
+        return val;
+    }, schema);
+
+const num = coerceNumber(z.number());
+const numNullable = coerceNumber(z.number().nullable());
 
 const pricePointSchema = z.object({
-    bid: numLike,
-    ask: numLike,
-    last: numLike.optional(),
+    bid: numNullable,
+    ask: numNullable,
+    last: numNullable.optional(),
 });
 
 const orderBookEntrySchema = z.object({
-    amount: z.number(),
-    rate: z.number(),
-    total: z.number(),
+    amount: num,
+    rate: num,
+    total: num,
     coin: z.string(),
     market: z.string().optional(),
 });
@@ -36,9 +40,9 @@ const completedOrderSchema = orderBookEntrySchema.extend({
 });
 
 const completedOrderWithFeesSchema = completedOrderSchema.extend({
-    audfeeExGst: z.number().optional(),
-    audGst: z.number().optional(),
-    audtotal: z.number().optional(),
+    audfeeExGst: numNullable.optional(),
+    audGst: numNullable.optional(),
+    audtotal: numNullable.optional(),
     type: z.string().optional(),
     otc: z.boolean().optional(),
 });
@@ -46,34 +50,34 @@ const completedOrderWithFeesSchema = completedOrderSchema.extend({
 const placedOrderSchema = statusMessageSchema.extend({
     coin: z.string(),
     market: z.string(),
-    amount: z.number(),
-    rate: z.number(),
+    amount: num,
+    rate: num,
     id: z.string(),
 });
 
 const editOrderSchema = statusMessageSchema.extend({
     id: z.string(),
     coin: z.string(),
-    rate: z.number(),
-    newrate: z.number(),
-    amount: z.number(),
-    total: z.number(),
+    rate: num,
+    newrate: num,
+    amount: num,
+    total: num,
     updated: z.boolean(),
 });
 
 const executionSchema = statusMessageSchema.extend({
     coin: z.string(),
-    amount: z.number(),
+    amount: num,
     market: z.string(),
-    total: z.number(),
-    rate: z.number().optional(),
+    total: num,
+    rate: numNullable.optional(),
 });
 
 const balanceEntrySchema = z.object({
-    balance: z.number(),
-    available: z.number().optional(),
-    audbalance: z.number(),
-    rate: z.number(),
+    balance: num,
+    available: numNullable.optional(),
+    audbalance: num,
+    rate: num,
 });
 
 const marketOrderHistorySchema = statusMessageSchema.extend({
@@ -82,30 +86,30 @@ const marketOrderHistorySchema = statusMessageSchema.extend({
 });
 
 export const schemas = {
-    status: statusBaseSchema,
+    account: statusBaseSchema,
     statusMessage: statusMessageSchema,
-    latestPrices: statusMessageSchema.extend({
+    ticker24hr: statusMessageSchema.extend({
         prices: z.record(pricePointSchema),
     }),
-    latestCoinPrices: statusMessageSchema.extend({
+    ticker24hrSymbol: statusMessageSchema.extend({
         prices: pricePointSchema,
     }),
-    latestRate: statusMessageSchema.extend({
-        rate: numLike,
+    avgPrice: statusMessageSchema.extend({
+        rate: numNullable,
         market: z.string(),
     }),
-    orderBook: statusMessageSchema.extend({
+    depth: statusMessageSchema.extend({
         buyorders: z.array(orderBookEntrySchema),
         sellorders: z.array(orderBookEntrySchema),
     }),
-    completedOrders: statusMessageSchema.extend({
+    trades: statusMessageSchema.extend({
         buyorders: z.array(completedOrderSchema),
         sellorders: z.array(completedOrderSchema),
     }),
-    completedOrdersSummary: statusMessageSchema.extend({
+    aggTrades: statusMessageSchema.extend({
         orders: z.array(completedOrderSchema),
     }),
-    depositAddresses: statusMessageSchema.extend({
+    capitalDepositAddress: statusMessageSchema.extend({
         networks: z.array(
             z.object({
                 name: z.string(),
@@ -115,49 +119,49 @@ export const schemas = {
             })
         ),
     }),
-    quote: statusMessageSchema.extend({
-        rate: z.number(),
+    orderQuote: statusMessageSchema.extend({
+        rate: num,
     }),
-    placedOrder: placedOrderSchema,
-    editedBuyOrder: editOrderSchema,
-    editedSellOrder: editOrderSchema,
-    buyNowExecution: executionSchema,
-    sellNowExecution: executionSchema,
-    swapNowExecution: executionSchema,
-    cancel: statusMessageSchema,
-    withdrawalDetails: statusMessageSchema.extend({
+    newOrder: placedOrderSchema,
+    orderUpdateBuy: editOrderSchema,
+    orderUpdateSell: editOrderSchema,
+    marketBuyExecution: executionSchema,
+    marketSellExecution: executionSchema,
+    marketSwapExecution: executionSchema,
+    cancelOrder: statusMessageSchema,
+    withdrawDetails: statusMessageSchema.extend({
         networks: z.array(
             z.object({
                 network: z.string(),
                 paymentid: z.string().optional(),
-                fee: z.number().optional(),
-                minsend: z.number().optional(),
+                fee: numNullable.optional(),
+                minsend: numNullable.optional(),
                 default: z.boolean().optional(),
             })
         ),
     }),
-    sendCoins: statusMessageSchema,
-    roMarketOrders: statusMessageSchema.extend({
+    withdraw: statusMessageSchema,
+    marketDepth: statusMessageSchema.extend({
         buyorders: z.array(orderBookEntrySchema),
         sellorders: z.array(orderBookEntrySchema),
     }),
-    roMarketOrdersWithFees: marketOrderHistorySchema,
-    roBalances: statusMessageSchema.extend({
+    marketTradesWithFees: marketOrderHistorySchema,
+    accountBalances: statusMessageSchema.extend({
         balances: z.array(z.record(balanceEntrySchema)),
     }),
-    roBalanceForCoin: statusMessageSchema.extend({
+    assetBalance: statusMessageSchema.extend({
         balance: z.record(balanceEntrySchema),
     }),
-    roMyOpenMarketOrders: statusMessageSchema.extend({
+    openMarketOrders: statusMessageSchema.extend({
         buyorders: z.array(
             z.object({
                 id: z.string(),
                 coin: z.string(),
                 market: z.string(),
-                amount: z.number(),
+                amount: num,
                 created: z.string(),
-                rate: z.number(),
-                total: z.number(),
+                rate: num,
+                total: num,
             })
         ),
         sellorders: z.array(
@@ -165,21 +169,21 @@ export const schemas = {
                 id: z.string(),
                 coin: z.string(),
                 market: z.string(),
-                amount: z.number(),
+                amount: num,
                 created: z.string(),
-                rate: z.number(),
-                total: z.number(),
+                rate: num,
+                total: num,
             })
         ),
     }),
-    roMyOpenLimitOrders: statusMessageSchema.extend({
+    openLimitOrders: statusMessageSchema.extend({
         buyorders: z.array(
             z.object({
                 id: z.string(),
                 coin: z.string(),
                 market: z.string(),
-                rate: z.number(),
-                amount: z.number(),
+                rate: num,
+                amount: num,
                 created: z.string(),
                 type: z.string(),
             })
@@ -189,41 +193,41 @@ export const schemas = {
                 id: z.string(),
                 coin: z.string(),
                 market: z.string(),
-                rate: z.number(),
-                amount: z.number(),
+                rate: num,
+                amount: num,
                 created: z.string(),
                 type: z.string(),
             })
         ),
     }),
-    roMyOrdersHistory: marketOrderHistorySchema,
-    roMyMarketOrdersHistory: marketOrderHistorySchema,
-    roSendReceive: statusMessageSchema.extend({
+    allOrders: marketOrderHistorySchema,
+    allMarketOrders: marketOrderHistorySchema,
+    transferHistory: statusMessageSchema.extend({
         sendtransactions: z.array(
             z.object({
                 timestamp: z.string(),
-                amount: z.number(),
+                amount: num,
                 coin: z.string(),
                 address: z.string(),
-                aud: z.number().optional(),
-                sendfee: z.number().optional(),
+                aud: numNullable.optional(),
+                sendfee: numNullable.optional(),
             })
         ),
         receivetransactions: z.array(
             z.object({
                 timestamp: z.string(),
-                amount: z.number(),
+                amount: num,
                 coin: z.string(),
                 address: z.string(),
-                aud: z.number().optional(),
+                aud: numNullable.optional(),
                 from: z.string().optional(),
             })
         ),
     }),
-    roDeposits: statusMessageSchema.extend({
+    fiatDepositHistory: statusMessageSchema.extend({
         deposits: z.array(
             z.object({
-                amount: z.number(),
+                amount: num,
                 created: z.string(),
                 status: z.string(),
                 type: z.string(),
@@ -231,61 +235,62 @@ export const schemas = {
             })
         ),
     }),
-    roWithdrawals: statusMessageSchema.extend({
+    fiatWithdrawalHistory: statusMessageSchema.extend({
         withdrawals: z.array(
             z.object({
-                amount: z.number(),
+                amount: num,
                 created: z.string(),
                 status: z.string(),
             })
         ),
     }),
-    roAffiliatePayments: statusMessageSchema.extend({
+    affiliatePayments: statusMessageSchema.extend({
         payments: z.array(
             z.object({
-                amount: z.number(),
+                amount: num,
                 month: z.string(),
             })
         ),
     }),
-    roReferralPayments: statusMessageSchema.extend({
+    referralPayments: statusMessageSchema.extend({
         payments: z.array(
             z.object({
-                amount: z.number(),
+                amount: num,
                 coin: z.string(),
-                audamount: z.number(),
+                audamount: num,
                 timestamp: z.string(),
             })
         ),
     }),
 };
 
-export type StatusResponse = z.infer<typeof schemas.status>;
+export type AccountResponse = z.infer<typeof schemas.account>;
 export type StatusMessageResponse = z.infer<typeof schemas.statusMessage>;
-export type LatestPricesResponse = z.infer<typeof schemas.latestPrices>;
-export type LatestCoinPricesResponse = z.infer<typeof schemas.latestCoinPrices>;
-export type LatestRateResponse = z.infer<typeof schemas.latestRate>;
-export type OrderBookResponse = z.infer<typeof schemas.orderBook>;
-export type CompletedOrdersResponse = z.infer<typeof schemas.completedOrders>;
-export type CompletedOrdersSummaryResponse = z.infer<typeof schemas.completedOrdersSummary>;
-export type DepositAddressesResponse = z.infer<typeof schemas.depositAddresses>;
-export type QuoteResponse = z.infer<typeof schemas.quote>;
-export type PlacedOrderResponse = z.infer<typeof schemas.placedOrder>;
-export type EditOrderResponse = z.infer<typeof schemas.editedBuyOrder>;
-export type ExecutionResponse = z.infer<typeof schemas.buyNowExecution>;
-export type CancellationResponse = z.infer<typeof schemas.cancel>;
-export type WithdrawalDetailsResponse = z.infer<typeof schemas.withdrawalDetails>;
-export type SendCoinResponse = z.infer<typeof schemas.sendCoins>;
-export type ReadOnlyMarketOrdersResponse = z.infer<typeof schemas.roMarketOrders>;
-export type ReadOnlyMarketOrdersWithFeesResponse = z.infer<typeof schemas.roMarketOrdersWithFees>;
-export type ReadOnlyBalancesResponse = z.infer<typeof schemas.roBalances>;
-export type ReadOnlyBalanceResponse = z.infer<typeof schemas.roBalanceForCoin>;
-export type ReadOnlyMyOpenMarketOrdersResponse = z.infer<typeof schemas.roMyOpenMarketOrders>;
-export type ReadOnlyMyOpenLimitOrdersResponse = z.infer<typeof schemas.roMyOpenLimitOrders>;
-export type ReadOnlyMyOrdersHistoryResponse = z.infer<typeof schemas.roMyOrdersHistory>;
-export type ReadOnlyMyMarketOrdersHistoryResponse = z.infer<typeof schemas.roMyMarketOrdersHistory>;
-export type ReadOnlySendReceiveResponse = z.infer<typeof schemas.roSendReceive>;
-export type ReadOnlyDepositsResponse = z.infer<typeof schemas.roDeposits>;
-export type ReadOnlyWithdrawalsResponse = z.infer<typeof schemas.roWithdrawals>;
-export type ReadOnlyAffiliatePaymentsResponse = z.infer<typeof schemas.roAffiliatePayments>;
-export type ReadOnlyReferralPaymentsResponse = z.infer<typeof schemas.roReferralPayments>;
+export type Ticker24hrResponse = z.infer<typeof schemas.ticker24hr>;
+export type Ticker24hrSymbolResponse = z.infer<typeof schemas.ticker24hrSymbol>;
+export type AvgPriceResponse = z.infer<typeof schemas.avgPrice>;
+export type DepthResponse = z.infer<typeof schemas.depth>;
+export type TradesResponse = z.infer<typeof schemas.trades>;
+export type AggTradesResponse = z.infer<typeof schemas.aggTrades>;
+export type CapitalDepositAddressResponse = z.infer<typeof schemas.capitalDepositAddress>;
+export type OrderQuoteResponse = z.infer<typeof schemas.orderQuote>;
+export type NewOrderResponse = z.infer<typeof schemas.newOrder>;
+export type OrderUpdateBuyResponse = z.infer<typeof schemas.orderUpdateBuy>;
+export type OrderUpdateSellResponse = z.infer<typeof schemas.orderUpdateSell>;
+export type OrderExecutionResponse = z.infer<typeof schemas.marketBuyExecution>;
+export type CancelOrderResponse = z.infer<typeof schemas.cancelOrder>;
+export type WithdrawDetailsResponse = z.infer<typeof schemas.withdrawDetails>;
+export type WithdrawResponse = z.infer<typeof schemas.withdraw>;
+export type MarketDepthResponse = z.infer<typeof schemas.marketDepth>;
+export type MarketTradesWithFeesResponse = z.infer<typeof schemas.marketTradesWithFees>;
+export type AccountBalancesResponse = z.infer<typeof schemas.accountBalances>;
+export type AssetBalanceResponse = z.infer<typeof schemas.assetBalance>;
+export type OpenMarketOrdersResponse = z.infer<typeof schemas.openMarketOrders>;
+export type OpenLimitOrdersResponse = z.infer<typeof schemas.openLimitOrders>;
+export type AllOrdersResponse = z.infer<typeof schemas.allOrders>;
+export type AllMarketOrdersResponse = z.infer<typeof schemas.allMarketOrders>;
+export type TransferHistoryResponse = z.infer<typeof schemas.transferHistory>;
+export type FiatDepositHistoryResponse = z.infer<typeof schemas.fiatDepositHistory>;
+export type FiatWithdrawalHistoryResponse = z.infer<typeof schemas.fiatWithdrawalHistory>;
+export type AffiliatePaymentsResponse = z.infer<typeof schemas.affiliatePayments>;
+export type ReferralPaymentsResponse = z.infer<typeof schemas.referralPayments>;

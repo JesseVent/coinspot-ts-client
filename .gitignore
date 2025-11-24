@@ -99,3 +99,11 @@ generated/
 
 # API probe outputs (personal/private API responses)
 docs/api-samples/
+probe_output/
+dist/
+AGENTS.md
+
+dist/
+docs/
+QWEN.md
+

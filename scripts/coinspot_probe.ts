@@ -2,13 +2,13 @@
  * CoinSpot schema probe helper (using coinspot-ts-client).
  *
  * Usage (safe default set):
- *   COINSPOT_KEY=... COINSPOT_SECRET=... npx ts-node scripts/coinspot_probe.ts
+ *   COINSPOT_API_KEY=... COINSPOT_API_SECRET=... npx ts-node scripts/coinspot_probe.ts
  *
  * Select endpoints:
- *   COINSPOT_KEY=... COINSPOT_SECRET=... npx ts-node scripts/coinspot_probe.ts latest balances buyQuote sellQuote
+ *   COINSPOT_API_KEY=... COINSPOT_API_SECRET=... npx ts-node scripts/coinspot_probe.ts latest balances buyQuote sellQuote
  *
  * Risky calls (executes $5 AUD buy/sell) require ALLOW_RISKY=true:
- *   ALLOW_RISKY=true COINSPOT_KEY=... COINSPOT_SECRET=... npx ts-node scripts/coinspot_probe.ts buyNow5 sellNow5
+ *   ALLOW_RISKY=true COINSPOT_API_KEY=... COINSPOT_API_SECRET=... npx ts-node scripts/coinspot_probe.ts buyNow5 sellNow5
  *
  * Env overrides: COIN=BTC, MARKET=AUD, AUD_AMOUNT=5
  */
@@ -17,18 +17,18 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { CoinspotClient } from '../client';
+import { CoinspotClient, CoinspotHttpError } from '../client';
 
-const key = process.env.COINSPOT_KEY || process.env.COINSPOT_API_KEY;
-const secret = process.env.COINSPOT_SECRET || process.env.COINSPOT_API_SECRET;
-const coin = process.env.COIN || 'BTC';
-const market = process.env.MARKET || 'AUD';
+const key = process.env.COINSPOT_API_KEY || process.env.COINSPOT_API_KEY;
+const secret = process.env.COINSPOT_API_SECRET || process.env.COINSPOT_API_SECRET;
+const coin = process.env.COIN || 'SOUL';
+const market = process.env.MARKET || 'usdt';
 const audAmount = Number(process.env.AUD_AMOUNT || process.env.AMOUNT || '5');
 let allowRisky = process.env.ALLOW_RISKY === 'true';
 const outDir = path.resolve(process.env.PROBE_OUT_DIR || './probe_output');
 
 if (!key || !secret) {
-  console.error('Set COINSPOT_KEY/COINSPOT_SECRET (or COINSPOT_API_KEY/COINSPOT_API_SECRET) in env.');
+  console.error('Set COINSPOT_API_KEY/COINSPOT_API_SECRET (or COINSPOT_API_KEY/COINSPOT_API_SECRET) in env.');
   process.exit(1);
 }
 
@@ -41,60 +41,65 @@ type Target = { risky?: boolean; request?: Record<string, unknown>; run: () => P
 
 const targets: Record<string, Target> = {
   // Public
-  latest: { run: () => client.public.getLatestPrices() },
-  latestCoin: { request: { cointype: coin }, run: () => client.public.getLatestPricesForCoin(coin) },
+  latest: { run: () => client.public.ticker24hr() },
+  latestCoin: { request: { cointype: coin }, run: () => client.public.ticker24hrForSymbol(coin) },
   latestCoinMarket: {
     request: { cointype: coin, markettype: market },
-    run: () => client.public.getLatestPricesForCoinMarket(coin, market),
+    run: () => client.public.ticker24hrForMarket(coin, market),
   },
-  buyPrice: { request: { cointype: coin }, run: () => client.public.getLatestBuyPrice(coin) },
-  sellPrice: { request: { cointype: coin }, run: () => client.public.getLatestSellPrice(coin) },
+  buyPrice: { request: { cointype: coin }, run: () => client.public.avgPrice(coin) },
+  sellPrice: { request: { cointype: coin }, run: () => client.public.bookTickerBid(coin) },
 
   // Read-only
-  roStatus: { run: () => client.readOnly.getStatus() },
-  balances: { run: () => client.readOnly.getBalances() },
-  balanceCoin: { run: () => client.readOnly.getBalanceForCoin({ cointype: coin, available: true }) },
+  roStatus: { run: () => client.readOnly.account() },
+  balances: { run: () => client.readOnly.accountBalances() },
+  balanceCoin: { run: () => client.readOnly.assetBalance({ cointype: coin, available: true }) },
   marketOpen: {
     request: { cointype: coin, markettype: market },
-    run: () => client.readOnly.getMarketOpenOrders({ cointype: coin, markettype: market }),
+    run: withMarketFallback(
+      () => client.readOnly.marketDepth({ cointype: coin, markettype: market }),
+      () => client.readOnly.marketDepth({ cointype: coin, markettype: 'btc' })
+    ),
   },
   marketCompleted: {
     request: { cointype: coin, markettype: market, limit: 5 },
-    run: () =>
-      client.readOnly.getMarketCompletedOrders({ cointype: coin, markettype: market, limit: 5 }),
+    run: withMarketFallback(
+      () => client.readOnly.marketTrades({ cointype: coin, markettype: market, limit: 5 }),
+      () => client.readOnly.marketTrades({ cointype: coin, markettype: 'btc', limit: 5 })
+    ),
   },
-  myOpenMarket: { request: { cointype: coin }, run: () => client.readOnly.getMyOpenMarketOrders({ cointype: coin }) },
-  myOpenLimit: { request: { cointype: coin }, run: () => client.readOnly.getMyOpenLimitOrders({ cointype: coin }) },
-  myHistory: { request: { cointype: coin, limit: 5 }, run: () => client.readOnly.getMyOrdersHistory({ cointype: coin, limit: 5 }) },
+  myOpenMarket: { request: { cointype: coin }, run: () => client.readOnly.openMarketOrders({ cointype: coin }) },
+  myOpenLimit: { request: { cointype: coin }, run: () => client.readOnly.openLimitOrders({ cointype: coin }) },
+  myHistory: { request: { cointype: coin, limit: 5 }, run: () => client.readOnly.allOrders({ cointype: coin, limit: 5 }) },
   myMarketHistory: {
     request: { cointype: coin, limit: 5 },
-    run: () => client.readOnly.getMyMarketOrdersHistory({ cointype: coin, limit: 5 }),
+    run: () => client.readOnly.allMarketOrders({ cointype: coin, limit: 5 }),
   },
 
   // Full access (non-mutating)
-  status: { run: () => client.fullAccess.getStatus() },
-  depositAddr: { request: { cointype: coin }, run: () => client.fullAccess.getDepositAddresses(coin) },
+  status: { run: () => client.fullAccess.account() },
+  depositAddr: { request: { cointype: coin }, run: () => client.fullAccess.capitalDepositAddress(coin) },
   buyQuote: {
     request: { cointype: coin, amount: audAmount, amounttype: 'aud' },
-    run: () => client.fullAccess.getBuyNowQuote(coin, audAmount, 'aud'),
+    run: () => client.fullAccess.orderQuoteBuy(coin, audAmount, 'aud'),
   },
   sellQuote: {
     request: { cointype: coin, amount: audAmount, amounttype: 'aud' },
-    run: () => client.fullAccess.getSellNowQuote(coin, audAmount, 'aud'),
+    run: () => client.fullAccess.orderQuoteSell(coin, audAmount, 'aud'),
   },
   swapQuote: {
     request: { cointypesell: coin, cointypebuy: 'MNT', amount: audAmount, amounttype: 'aud' },
-    run: () => client.fullAccess.getSwapNowQuote('BTC', 'MNT', audAmount),
+    run: () => client.fullAccess.orderQuoteSwap('BTC', 'MNT', audAmount),
   },
   swapNow5: {
     risky: true,
     request: { cointypesell: coin, cointypebuy: 'MNT', amountAud: audAmount },
     run: async () => {
-      const sellPrice = await client.public.getLatestSellPrice(coin);
+      const sellPrice = await client.public.bookTickerBid(coin);
       const rate = Number(sellPrice.rate);
       if (!rate || Number.isNaN(rate)) throw new Error('Could not fetch sell price for swap sizing');
       const amountCoin = Number((audAmount / rate).toFixed(8)); // sell ~AUD_AMOUNT worth of coin
-      return client.fullAccess.placeSwapNowOrder({
+      return client.fullAccess.orderSwapNow({
         cointypesell: coin,
         cointypebuy: 'MNT',
         amount: amountCoin,
@@ -106,12 +111,12 @@ const targets: Record<string, Target> = {
   buyNow5: {
     risky: true,
     request: { cointype: coin, amounttype: 'aud', amount: audAmount },
-    run: () => client.fullAccess.placeBuyNowOrder({ cointype: coin, amounttype: 'aud', amount: audAmount }),
+    run: () => client.fullAccess.orderMarketBuyNow({ cointype: coin, amounttype: 'aud', amount: audAmount }),
   },
   sellNow5: {
     risky: true,
     request: { cointype: coin, amounttype: 'aud', amount: audAmount },
-    run: () => client.fullAccess.placeSellNowOrder({ cointype: coin, amounttype: 'aud', amount: audAmount }),
+    run: () => client.fullAccess.orderMarketSellNow({ cointype: coin, amounttype: 'aud', amount: audAmount }),
   },
   marketBuy: {
     risky: true,
@@ -120,11 +125,11 @@ const targets: Record<string, Target> = {
       const marketLower = market.toLowerCase();
       const useAltMarket = marketLower !== 'aud';
       const sellQuote = useAltMarket
-        ? await client.public.getLatestSellPriceInMarket(coin, marketLower)
-        : await client.public.getLatestSellPrice(coin);
+        ? await client.public.bookTickerBidForMarket(coin, marketLower)
+        : await client.public.bookTickerBid(coin);
       const rate = Number(sellQuote.rate) * 0.95; // 5% below current sell price to stay open
       const coinAmount = Number((audAmount / rate).toFixed(8));
-      return client.fullAccess.placeMarketBuyOrder({
+      return client.fullAccess.createOrderBuy({
         cointype: coin,
         amount: coinAmount,
         rate,
@@ -139,11 +144,11 @@ const targets: Record<string, Target> = {
       const marketLower = market.toLowerCase();
       const useAltMarket = marketLower !== 'aud';
       const buyQuote = useAltMarket
-        ? await client.public.getLatestBuyPriceInMarket(coin, marketLower)
-        : await client.public.getLatestBuyPrice(coin);
+        ? await client.public.avgPriceForMarket(coin, marketLower)
+        : await client.public.avgPrice(coin);
       const rate = Number(buyQuote.rate) * 1.05; // 5% above current buy price to stay open
       const coinAmount = Number((audAmount / rate).toFixed(8));
-      return client.fullAccess.placeMarketSellOrder({
+      return client.fullAccess.createOrderSell({
         cointype: coin,
         amount: coinAmount,
         rate,
@@ -156,10 +161,10 @@ const targets: Record<string, Target> = {
     request: { id: '<buy order id>' },
     run: async () => {
       // Cancel the first open buy order if present
-      const open = await client.readOnly.getMyOpenMarketOrders({ cointype: coin });
+      const open = await client.readOnly.openMarketOrders({ cointype: coin });
       const id = open.buyorders?.[0]?.id;
       if (!id) throw new Error('No open buy orders to cancel');
-      return client.fullAccess.cancelBuyOrder(id);
+      return client.fullAccess.cancelOrderBuy(id);
     },
   },
   cancelSell: {
@@ -167,21 +172,21 @@ const targets: Record<string, Target> = {
     request: { id: '<sell order id>' },
     run: async () => {
       // Cancel the first open sell order if present
-      const open = await client.readOnly.getMyOpenMarketOrders({ cointype: coin });
+      const open = await client.readOnly.openMarketOrders({ cointype: coin });
       const id = open.sellorders?.[0]?.id;
       if (!id) throw new Error('No open sell orders to cancel');
-      return client.fullAccess.cancelSellOrder(id);
+      return client.fullAccess.cancelOrderSell(id);
     },
   },
   editBuy: {
     risky: true,
     request: { id: '<buy order id>', rate: 'rate * 0.97' },
     run: async () => {
-      const open = await client.readOnly.getMyOpenMarketOrders({ cointype: coin });
+      const open = await client.readOnly.openMarketOrders({ cointype: coin });
       const order = open.buyorders?.[0];
       if (!order?.id || order.rate === undefined) throw new Error('No open buy orders to edit');
       const newrate = Number(order.rate) * 0.97; // drop 3% to keep it resting
-      return client.fullAccess.editMarketBuyOrder({
+      return client.fullAccess.updateOrderBuy({
         cointype: coin,
         id: order.id,
         rate: Number(order.rate),
@@ -193,11 +198,11 @@ const targets: Record<string, Target> = {
     risky: true,
     request: { id: '<sell order id>', rate: 'rate * 1.03' },
     run: async () => {
-      const open = await client.readOnly.getMyOpenMarketOrders({ cointype: coin });
+      const open = await client.readOnly.openMarketOrders({ cointype: coin });
       const order = open.sellorders?.[0];
       if (!order?.id || order.rate === undefined) throw new Error('No open sell orders to edit');
       const newrate = Number(order.rate) * 1.03; // bump 3% to keep it resting
-      return client.fullAccess.editMarketSellOrder({
+      return client.fullAccess.updateOrderSell({
         cointype: coin,
         id: order.id,
         rate: Number(order.rate),
@@ -208,12 +213,12 @@ const targets: Record<string, Target> = {
   cancelBuyAll: {
     risky: true,
     request: { cointype: coin },
-    run: () => client.fullAccess.cancelAllBuyOrders({ coin }),
+    run: () => client.fullAccess.cancelOpenOrdersBuy({ coin }),
   },
   cancelSellAll: {
     risky: true,
     request: { cointype: coin },
-    run: () => client.fullAccess.cancelAllSellOrders({ coin }),
+    run: () => client.fullAccess.cancelOpenOrdersSell({ coin }),
   },
 };
 
@@ -229,6 +234,19 @@ function shape(value: unknown, depth = 0): string {
     return [`${indent}object`, ...lines].join('\n');
   }
   return `${indent}${typeof value}`;
+}
+
+function withMarketFallback<T>(runner: () => Promise<T>, fallback: () => Promise<T>): () => Promise<T> {
+  return async () => {
+    try {
+      return await runner();
+    } catch (err) {
+      if (err instanceof CoinspotHttpError && err.statusCode === 400) {
+        return fallback();
+      }
+      throw err;
+    }
+  };
 }
 
 async function main() {
@@ -297,7 +315,31 @@ async function main() {
       await fs.writeFile(file, JSON.stringify(record, null, 2), 'utf8');
       console.log(`saved -> ${file}`);
     } catch (err) {
-      console.error(`Error on ${name}:`, (err as Error).message);
+      const error = err as Error;
+      const isHttp = error instanceof CoinspotHttpError;
+      const isUnsupportedPair = isHttp && error.statusCode === 400;
+      const message = isUnsupportedPair
+        ? `Skipping ${name}: pair not available on CoinSpot (400)`
+        : `Error on ${name}: ${error.message}`;
+      console.warn(message);
+
+      const errorRecord = {
+        name,
+        timestamp: new Date().toISOString(),
+        coin,
+        market,
+        audAmount,
+        risky: !!target.risky,
+        request: target.request ?? null,
+        error: {
+          message: error.message,
+          statusCode: isHttp ? error.statusCode : undefined,
+          responseText: isHttp ? error.responseText : undefined,
+        },
+      };
+      const file = path.join(outDir, `${Date.now()}_${name}_error.json`);
+      await fs.writeFile(file, JSON.stringify(errorRecord, null, 2), 'utf8');
+      console.log(`saved -> ${file}`);
     }
   }
 }

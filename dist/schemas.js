@@ -8,15 +8,26 @@ const statusBaseSchema = zod_1.z.object({
 const statusMessageSchema = statusBaseSchema.extend({
     message: zod_1.z.string().optional(),
 });
+const coerceNumber = (schema) => zod_1.z.preprocess((val) => {
+    if (val === 'NaN')
+        return null;
+    if (typeof val === 'string') {
+        const n = Number(val);
+        return Number.isNaN(n) ? val : n;
+    }
+    return val;
+}, schema);
+const num = coerceNumber(zod_1.z.number());
+const numNullable = coerceNumber(zod_1.z.number().nullable());
 const pricePointSchema = zod_1.z.object({
-    bid: zod_1.z.number(),
-    ask: zod_1.z.number(),
-    last: zod_1.z.number(),
+    bid: numNullable,
+    ask: numNullable,
+    last: numNullable.optional(),
 });
 const orderBookEntrySchema = zod_1.z.object({
-    amount: zod_1.z.number(),
-    rate: zod_1.z.number(),
-    total: zod_1.z.number(),
+    amount: num,
+    rate: num,
+    total: num,
     coin: zod_1.z.string(),
     market: zod_1.z.string().optional(),
 });
@@ -24,70 +35,70 @@ const completedOrderSchema = orderBookEntrySchema.extend({
     solddate: zod_1.z.string().optional(),
 });
 const completedOrderWithFeesSchema = completedOrderSchema.extend({
-    audfeeExGst: zod_1.z.number().optional(),
-    audGst: zod_1.z.number().optional(),
-    audtotal: zod_1.z.number().optional(),
+    audfeeExGst: numNullable.optional(),
+    audGst: numNullable.optional(),
+    audtotal: numNullable.optional(),
     type: zod_1.z.string().optional(),
     otc: zod_1.z.boolean().optional(),
 });
 const placedOrderSchema = statusMessageSchema.extend({
     coin: zod_1.z.string(),
     market: zod_1.z.string(),
-    amount: zod_1.z.number(),
-    rate: zod_1.z.number(),
+    amount: num,
+    rate: num,
     id: zod_1.z.string(),
 });
 const editOrderSchema = statusMessageSchema.extend({
     id: zod_1.z.string(),
     coin: zod_1.z.string(),
-    rate: zod_1.z.number(),
-    newrate: zod_1.z.number(),
-    amount: zod_1.z.number(),
-    total: zod_1.z.number(),
+    rate: num,
+    newrate: num,
+    amount: num,
+    total: num,
     updated: zod_1.z.boolean(),
 });
 const executionSchema = statusMessageSchema.extend({
     coin: zod_1.z.string(),
-    amount: zod_1.z.number(),
+    amount: num,
     market: zod_1.z.string(),
-    total: zod_1.z.number(),
-    rate: zod_1.z.number().optional(),
+    total: num,
+    rate: numNullable.optional(),
 });
 const balanceEntrySchema = zod_1.z.object({
-    balance: zod_1.z.number(),
-    available: zod_1.z.number().optional(),
-    audbalance: zod_1.z.number(),
-    rate: zod_1.z.number(),
+    balance: num,
+    available: numNullable.optional(),
+    audbalance: num,
+    rate: num,
 });
 const marketOrderHistorySchema = statusMessageSchema.extend({
     buyorders: zod_1.z.array(completedOrderWithFeesSchema),
     sellorders: zod_1.z.array(completedOrderWithFeesSchema),
 });
 exports.schemas = {
-    status: statusBaseSchema,
+    account: statusBaseSchema,
     statusMessage: statusMessageSchema,
-    latestPrices: statusMessageSchema.extend({
+    ticker24hr: statusMessageSchema.extend({
         prices: zod_1.z.record(pricePointSchema),
     }),
-    latestCoinPrices: statusMessageSchema.extend({
+    ticker24hrSymbol: statusMessageSchema.extend({
         prices: pricePointSchema,
     }),
-    latestRate: statusMessageSchema.extend({
-        rate: zod_1.z.number(),
+    avgPrice: statusMessageSchema.extend({
+        rate: numNullable,
         market: zod_1.z.string(),
     }),
-    orderBook: statusMessageSchema.extend({
+    depth: statusMessageSchema.extend({
         buyorders: zod_1.z.array(orderBookEntrySchema),
         sellorders: zod_1.z.array(orderBookEntrySchema),
     }),
-    completedOrders: statusMessageSchema.extend({
+    trades: statusMessageSchema.extend({
         buyorders: zod_1.z.array(completedOrderSchema),
         sellorders: zod_1.z.array(completedOrderSchema),
     }),
-    completedOrdersSummary: statusMessageSchema.extend({
+    aggTrades: statusMessageSchema.extend({
         orders: zod_1.z.array(completedOrderSchema),
     }),
-    depositAddresses: statusMessageSchema.extend({
+    capitalDepositAddress: statusMessageSchema.extend({
         networks: zod_1.z.array(zod_1.z.object({
             name: zod_1.z.string(),
             network: zod_1.z.string(),
@@ -95,64 +106,64 @@ exports.schemas = {
             memo: zod_1.z.string().optional(),
         })),
     }),
-    quote: statusMessageSchema.extend({
-        rate: zod_1.z.number(),
+    orderQuote: statusMessageSchema.extend({
+        rate: num,
     }),
-    placedOrder: placedOrderSchema,
-    editedBuyOrder: editOrderSchema,
-    editedSellOrder: editOrderSchema,
-    buyNowExecution: executionSchema,
-    sellNowExecution: executionSchema,
-    swapNowExecution: executionSchema,
-    cancel: statusMessageSchema,
-    withdrawalDetails: statusMessageSchema.extend({
+    newOrder: placedOrderSchema,
+    orderUpdateBuy: editOrderSchema,
+    orderUpdateSell: editOrderSchema,
+    marketBuyExecution: executionSchema,
+    marketSellExecution: executionSchema,
+    marketSwapExecution: executionSchema,
+    cancelOrder: statusMessageSchema,
+    withdrawDetails: statusMessageSchema.extend({
         networks: zod_1.z.array(zod_1.z.object({
             network: zod_1.z.string(),
             paymentid: zod_1.z.string().optional(),
-            fee: zod_1.z.number().optional(),
-            minsend: zod_1.z.number().optional(),
+            fee: numNullable.optional(),
+            minsend: numNullable.optional(),
             default: zod_1.z.boolean().optional(),
         })),
     }),
-    sendCoins: statusMessageSchema,
-    roMarketOrders: statusMessageSchema.extend({
+    withdraw: statusMessageSchema,
+    marketDepth: statusMessageSchema.extend({
         buyorders: zod_1.z.array(orderBookEntrySchema),
         sellorders: zod_1.z.array(orderBookEntrySchema),
     }),
-    roMarketOrdersWithFees: marketOrderHistorySchema,
-    roBalances: statusMessageSchema.extend({
+    marketTradesWithFees: marketOrderHistorySchema,
+    accountBalances: statusMessageSchema.extend({
         balances: zod_1.z.array(zod_1.z.record(balanceEntrySchema)),
     }),
-    roBalanceForCoin: statusMessageSchema.extend({
+    assetBalance: statusMessageSchema.extend({
         balance: zod_1.z.record(balanceEntrySchema),
     }),
-    roMyOpenMarketOrders: statusMessageSchema.extend({
+    openMarketOrders: statusMessageSchema.extend({
         buyorders: zod_1.z.array(zod_1.z.object({
             id: zod_1.z.string(),
             coin: zod_1.z.string(),
             market: zod_1.z.string(),
-            amount: zod_1.z.number(),
+            amount: num,
             created: zod_1.z.string(),
-            rate: zod_1.z.number(),
-            total: zod_1.z.number(),
+            rate: num,
+            total: num,
         })),
         sellorders: zod_1.z.array(zod_1.z.object({
             id: zod_1.z.string(),
             coin: zod_1.z.string(),
             market: zod_1.z.string(),
-            amount: zod_1.z.number(),
+            amount: num,
             created: zod_1.z.string(),
-            rate: zod_1.z.number(),
-            total: zod_1.z.number(),
+            rate: num,
+            total: num,
         })),
     }),
-    roMyOpenLimitOrders: statusMessageSchema.extend({
+    openLimitOrders: statusMessageSchema.extend({
         buyorders: zod_1.z.array(zod_1.z.object({
             id: zod_1.z.string(),
             coin: zod_1.z.string(),
             market: zod_1.z.string(),
-            rate: zod_1.z.number(),
-            amount: zod_1.z.number(),
+            rate: num,
+            amount: num,
             created: zod_1.z.string(),
             type: zod_1.z.string(),
         })),
@@ -160,59 +171,59 @@ exports.schemas = {
             id: zod_1.z.string(),
             coin: zod_1.z.string(),
             market: zod_1.z.string(),
-            rate: zod_1.z.number(),
-            amount: zod_1.z.number(),
+            rate: num,
+            amount: num,
             created: zod_1.z.string(),
             type: zod_1.z.string(),
         })),
     }),
-    roMyOrdersHistory: marketOrderHistorySchema,
-    roMyMarketOrdersHistory: marketOrderHistorySchema,
-    roSendReceive: statusMessageSchema.extend({
+    allOrders: marketOrderHistorySchema,
+    allMarketOrders: marketOrderHistorySchema,
+    transferHistory: statusMessageSchema.extend({
         sendtransactions: zod_1.z.array(zod_1.z.object({
             timestamp: zod_1.z.string(),
-            amount: zod_1.z.number(),
+            amount: num,
             coin: zod_1.z.string(),
             address: zod_1.z.string(),
-            aud: zod_1.z.number().optional(),
-            sendfee: zod_1.z.number().optional(),
+            aud: numNullable.optional(),
+            sendfee: numNullable.optional(),
         })),
         receivetransactions: zod_1.z.array(zod_1.z.object({
             timestamp: zod_1.z.string(),
-            amount: zod_1.z.number(),
+            amount: num,
             coin: zod_1.z.string(),
             address: zod_1.z.string(),
-            aud: zod_1.z.number().optional(),
+            aud: numNullable.optional(),
             from: zod_1.z.string().optional(),
         })),
     }),
-    roDeposits: statusMessageSchema.extend({
+    fiatDepositHistory: statusMessageSchema.extend({
         deposits: zod_1.z.array(zod_1.z.object({
-            amount: zod_1.z.number(),
+            amount: num,
             created: zod_1.z.string(),
             status: zod_1.z.string(),
             type: zod_1.z.string(),
             reference: zod_1.z.string(),
         })),
     }),
-    roWithdrawals: statusMessageSchema.extend({
+    fiatWithdrawalHistory: statusMessageSchema.extend({
         withdrawals: zod_1.z.array(zod_1.z.object({
-            amount: zod_1.z.number(),
+            amount: num,
             created: zod_1.z.string(),
             status: zod_1.z.string(),
         })),
     }),
-    roAffiliatePayments: statusMessageSchema.extend({
+    affiliatePayments: statusMessageSchema.extend({
         payments: zod_1.z.array(zod_1.z.object({
-            amount: zod_1.z.number(),
+            amount: num,
             month: zod_1.z.string(),
         })),
     }),
-    roReferralPayments: statusMessageSchema.extend({
+    referralPayments: statusMessageSchema.extend({
         payments: zod_1.z.array(zod_1.z.object({
-            amount: zod_1.z.number(),
+            amount: num,
             coin: zod_1.z.string(),
-            audamount: zod_1.z.number(),
+            audamount: num,
             timestamp: zod_1.z.string(),
         })),
     }),

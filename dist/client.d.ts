@@ -1,4 +1,4 @@
-import { CancellationResponse, CompletedOrdersResponse, CompletedOrdersSummaryResponse, DepositAddressesResponse, EditOrderResponse, ExecutionResponse, LatestCoinPricesResponse, LatestPricesResponse, LatestRateResponse, OrderBookResponse, PlacedOrderResponse, QuoteResponse, ReadOnlyAffiliatePaymentsResponse, ReadOnlyBalanceResponse, ReadOnlyBalancesResponse, ReadOnlyDepositsResponse, ReadOnlyMarketOrdersResponse, ReadOnlyMarketOrdersWithFeesResponse, ReadOnlyMyMarketOrdersHistoryResponse, ReadOnlyMyOpenLimitOrdersResponse, ReadOnlyMyOpenMarketOrdersResponse, ReadOnlyMyOrdersHistoryResponse, ReadOnlyReferralPaymentsResponse, ReadOnlySendReceiveResponse, ReadOnlyWithdrawalsResponse, SendCoinResponse, StatusResponse, WithdrawalDetailsResponse, schemas } from './schemas';
+import { AccountBalancesResponse, AccountResponse, AffiliatePaymentsResponse, AggTradesResponse, AllMarketOrdersResponse, AllOrdersResponse, AssetBalanceResponse, AvgPriceResponse, CancelOrderResponse, CapitalDepositAddressResponse, DepthResponse, FiatDepositHistoryResponse, FiatWithdrawalHistoryResponse, MarketDepthResponse, MarketTradesWithFeesResponse, NewOrderResponse, OpenLimitOrdersResponse, OpenMarketOrdersResponse, OrderExecutionResponse, OrderQuoteResponse, OrderUpdateBuyResponse, OrderUpdateSellResponse, ReferralPaymentsResponse, Ticker24hrResponse, Ticker24hrSymbolResponse, TradesResponse, TransferHistoryResponse, WithdrawDetailsResponse, WithdrawResponse, schemas } from './schemas';
 export interface CoinspotCredential {
     key: string;
     secret: string;
@@ -28,19 +28,20 @@ export interface CoinspotClientOptions {
     timeoutMs?: number;
     userAgent?: string;
 }
-export interface PlaceMarketBuyOrderParams {
+export interface NewBuyOrderParams {
     cointype: string;
     amount: number;
     rate: number;
     markettype?: string;
 }
-export interface EditMarketBuyOrderParams {
+export interface UpdateBuyOrderParams {
     cointype: string;
     id: string;
     rate: number;
     newrate: number;
+    markettype?: string;
 }
-export interface BuyNowOrderParams {
+export interface MarketBuyNowParams {
     cointype: string;
     amounttype: 'coin' | 'aud';
     amount: number;
@@ -48,19 +49,20 @@ export interface BuyNowOrderParams {
     threshold?: number;
     direction?: 'UP' | 'DOWN' | 'BOTH';
 }
-export interface PlaceMarketSellOrderParams {
+export interface NewSellOrderParams {
     cointype: string;
     amount: number;
     rate: number;
     markettype?: string;
 }
-export interface EditMarketSellOrderParams {
+export interface UpdateSellOrderParams {
     cointype: string;
     id: string;
     rate: number;
     newrate: number;
+    markettype?: string;
 }
-export interface SellNowOrderParams {
+export interface MarketSellNowParams {
     cointype: string;
     amounttype: 'coin' | 'aud';
     amount: number;
@@ -68,7 +70,7 @@ export interface SellNowOrderParams {
     threshold?: number;
     direction?: 'UP' | 'DOWN' | 'BOTH';
 }
-export interface SwapNowOrderParams {
+export interface MarketSwapNowParams {
     cointypesell: string;
     cointypebuy: string;
     amount: number;
@@ -76,13 +78,13 @@ export interface SwapNowOrderParams {
     threshold?: number;
     direction?: 'UP' | 'DOWN' | 'BOTH';
 }
-export interface CancelOrdersParams {
+export interface CancelOpenOrdersParams {
     coin?: string;
 }
-export interface WithdrawalDetailsParams {
+export interface WithdrawDetailsParams {
     cointype: string;
 }
-export interface SendCoinsParams {
+export interface WithdrawRequestParams {
     cointype: string;
     amount: number;
     address: string;
@@ -90,36 +92,36 @@ export interface SendCoinsParams {
     network?: string;
     paymentid?: string;
 }
-export interface MarketOpenOrdersParams {
+export interface DepthParams {
     cointype: string;
     markettype?: string;
 }
-export interface MarketCompletedOrdersParams {
+export interface MarketTradesParams {
     cointype: string;
     markettype?: string;
     startdate?: string | number;
     enddate?: string | number;
     limit?: number;
 }
-export interface BalanceForCoinParams {
+export interface AssetBalanceParams {
     cointype: string;
     available?: boolean;
 }
-export interface MyOpenMarketOrdersParams {
+export interface OpenOrdersParams {
     cointype?: string;
     markettype?: string;
 }
-export interface MyOpenLimitOrdersParams {
+export interface OpenLimitOrdersParams {
     cointype?: string;
 }
-export interface MyOrdersHistoryParams {
+export interface AllOrdersParams {
     cointype?: string;
     markettype?: string;
     startdate?: string | number;
     enddate?: string | number;
     limit?: number;
 }
-export interface SendReceiveHistoryParams {
+export interface TransferHistoryParams {
     startdate?: string;
     enddate?: string;
 }
@@ -175,32 +177,32 @@ export declare class CoinspotPublicApi {
     private readonly transport;
     private readonly baseUrl;
     constructor(transport: CoinspotTransport, baseUrl: string);
-    /** Latest buy/sell/last prices for every market (GET /pubapi/v2/latest). */
-    getLatestPrices(): Promise<LatestPricesResponse>;
-    /** Latest prices for a specific coin (GET /pubapi/v2/latest/{cointype}). */
-    getLatestPricesForCoin(cointype: string): Promise<LatestCoinPricesResponse>;
-    /** Latest prices for a specific coin/market pair (GET /pubapi/v2/latest/{cointype}/{markettype}). */
-    getLatestPricesForCoinMarket(cointype: string, markettype: string): Promise<LatestCoinPricesResponse>;
-    /** Latest buy price for a coin in AUD (GET /pubapi/v2/buyprice/{cointype}). */
-    getLatestBuyPrice(cointype: string): Promise<LatestRateResponse>;
-    /** Latest buy price for a coin in a non-AUD market (GET /pubapi/v2/buyprice/{cointype}/{markettype}). */
-    getLatestBuyPriceInMarket(cointype: string, markettype: string): Promise<LatestRateResponse>;
-    /** Latest sell price for a coin in AUD (GET /pubapi/v2/sellprice/{cointype}). */
-    getLatestSellPrice(cointype: string): Promise<LatestRateResponse>;
-    /** Latest sell price for a coin in a non-AUD market (GET /pubapi/v2/sellprice/{cointype}/{markettype}). */
-    getLatestSellPriceInMarket(cointype: string, markettype: string): Promise<LatestRateResponse>;
-    /** Top buy/sell orders for a coin in AUD (GET /pubapi/v2/orders/open/{cointype}). */
-    getOpenOrders(cointype: string): Promise<OrderBookResponse>;
-    /** Top buy/sell orders for a coin/market pair (GET /pubapi/v2/orders/open/{cointype}/{markettype}). */
-    getOpenOrdersForMarket(cointype: string, markettype: string): Promise<OrderBookResponse>;
-    /** Completed buy/sell orders for a coin in AUD (GET /pubapi/v2/orders/completed/{cointype}). */
-    getCompletedOrders(cointype: string): Promise<CompletedOrdersResponse>;
-    /** Completed buy/sell orders for a coin/market pair (GET /pubapi/v2/orders/completed/{cointype}/{markettype}). */
-    getCompletedOrdersForMarket(cointype: string, markettype: string): Promise<CompletedOrdersResponse>;
-    /** Completed orders summary for a coin in AUD (GET /pubapi/v2/orders/summary/completed/{cointype}). */
-    getCompletedOrdersSummary(cointype: string): Promise<CompletedOrdersSummaryResponse>;
-    /** Completed orders summary for a coin/market pair (GET /pubapi/v2/orders/summary/completed/{cointype}/{markettype}). */
-    getCompletedOrdersSummaryForMarket(cointype: string, markettype: string): Promise<CompletedOrdersSummaryResponse>;
+    /** Binance-style ticker24hr for all markets (GET /pubapi/v2/latest). */
+    ticker24hr(): Promise<Ticker24hrResponse>;
+    /** Binance-style ticker24hr scoped to a symbol (GET /pubapi/v2/latest/{cointype}). */
+    ticker24hrForSymbol(symbol: string): Promise<Ticker24hrSymbolResponse>;
+    /** Binance-style ticker24hr for a symbol/quote pair (GET /pubapi/v2/latest/{cointype}/{markettype}). */
+    ticker24hrForMarket(symbol: string, quote: string): Promise<Ticker24hrSymbolResponse>;
+    /** Binance avgPrice equivalent using buy price (GET /pubapi/v2/buyprice/{cointype}). */
+    avgPrice(symbol: string): Promise<AvgPriceResponse>;
+    /** Binance avgPrice equivalent for a quote market (GET /pubapi/v2/buyprice/{cointype}/{markettype}). */
+    avgPriceForMarket(symbol: string, quote: string): Promise<AvgPriceResponse>;
+    /** Binance bookTicker bid side using CoinSpot sell price (GET /pubapi/v2/sellprice/{cointype}). */
+    bookTickerBid(symbol: string): Promise<AvgPriceResponse>;
+    /** Binance bookTicker bid side with quote market (GET /pubapi/v2/sellprice/{cointype}/{markettype}). */
+    bookTickerBidForMarket(symbol: string, quote: string): Promise<AvgPriceResponse>;
+    /** Binance depth equivalent for AUD market (GET /pubapi/v2/orders/open/{cointype}). */
+    depth(symbol: string): Promise<DepthResponse>;
+    /** Binance depth equivalent for a symbol/quote market (GET /pubapi/v2/orders/open/{cointype}/{markettype}). */
+    depthForMarket(symbol: string, quote: string): Promise<DepthResponse>;
+    /** Binance trades equivalent (GET /pubapi/v2/orders/completed/{cointype}). */
+    trades(symbol: string): Promise<TradesResponse>;
+    /** Binance trades equivalent for a market pair (GET /pubapi/v2/orders/completed/{cointype}/{markettype}). */
+    tradesForMarket(symbol: string, quote: string): Promise<TradesResponse>;
+    /** Binance aggTrades style summary (GET /pubapi/v2/orders/summary/completed/{cointype}). */
+    aggTrades(symbol: string): Promise<AggTradesResponse>;
+    /** Binance aggTrades style summary for a market pair (GET /pubapi/v2/orders/summary/completed/{cointype}/{markettype}). */
+    aggTradesForMarket(symbol: string, quote: string): Promise<AggTradesResponse>;
 }
 export declare class CoinspotFullAccessApi {
     private readonly transport;
@@ -211,42 +213,42 @@ export declare class CoinspotFullAccessApi {
     private ensureAuth;
     private sign;
     private post;
-    /** Status heartbeat for full-access key (POST /api/v2/status). */
-    getStatus(): Promise<StatusResponse>;
-    /** Retrieve deposit addresses for a coin (POST /api/v2/my/coin/deposit). */
-    getDepositAddresses(cointype: string): Promise<DepositAddressesResponse>;
-    /** Quote a buy-now order (POST /api/v2/quote/buy/now). */
-    getBuyNowQuote(cointype: string, amount: number, amounttype: 'coin' | 'aud'): Promise<QuoteResponse>;
-    /** Quote a sell-now order (POST /api/v2/quote/sell/now). */
-    getSellNowQuote(cointype: string, amount: number, amounttype: 'coin' | 'aud'): Promise<QuoteResponse>;
-    /** Quote a swap-now order (POST /api/v2/quote/swap/now). */
-    getSwapNowQuote(cointypesell: string, cointypebuy: string, amount: number): Promise<QuoteResponse>;
-    /** Place a market buy order (POST /api/v2/my/buy). */
-    placeMarketBuyOrder(params: PlaceMarketBuyOrderParams): Promise<PlacedOrderResponse>;
-    /** Edit an open market buy order (POST /api/v2/my/buy/edit). */
-    editMarketBuyOrder(params: EditMarketBuyOrderParams): Promise<EditOrderResponse>;
-    /** Execute a buy-now order at the current market rate (POST /api/v2/my/buy/now). */
-    placeBuyNowOrder(params: BuyNowOrderParams): Promise<ExecutionResponse>;
-    /** Place a market sell order (POST /api/v2/my/sell). */
-    placeMarketSellOrder(params: PlaceMarketSellOrderParams): Promise<PlacedOrderResponse>;
-    /** Edit an open market sell order (POST /api/v2/my/sell/edit). */
-    editMarketSellOrder(params: EditMarketSellOrderParams): Promise<EditOrderResponse>;
-    /** Execute a sell-now order at the current market rate (POST /api/v2/my/sell/now). */
-    placeSellNowOrder(params: SellNowOrderParams): Promise<ExecutionResponse>;
-    /** Execute a swap-now order between two coins (POST /api/v2/my/swap/now). */
-    placeSwapNowOrder(params: SwapNowOrderParams): Promise<ExecutionResponse>;
-    /** Cancel a single buy order (POST /api/v2/my/buy/cancel). */
-    cancelBuyOrder(id: string): Promise<CancellationResponse>;
-    /** Cancel all open buy orders, optionally filtered by coin (POST /api/v2/my/buy/cancel/all). */
-    cancelAllBuyOrders(params?: CancelOrdersParams): Promise<CancellationResponse>;
-    /** Cancel a single sell order (POST /api/v2/my/sell/cancel). */
-    cancelSellOrder(id: string): Promise<CancellationResponse>;
-    /** Cancel all open sell orders, optionally filtered by coin (POST /api/v2/my/sell/cancel/all). */
-    cancelAllSellOrders(params?: CancelOrdersParams): Promise<CancellationResponse>;
-    /** List withdrawal details for a coin (POST /api/v2/my/coin/withdraw/senddetails). */
-    getWithdrawalDetails(params: WithdrawalDetailsParams): Promise<WithdrawalDetailsResponse>;
-    /** Send a coin withdrawal (POST /api/v2/my/coin/withdraw/send). */
-    sendCoins(params: SendCoinsParams): Promise<SendCoinResponse>;
+    /** Binance account equivalent (POST /api/v2/status). */
+    account(): Promise<AccountResponse>;
+    /** Binance capitalDepositAddress equivalent (POST /api/v2/my/coin/deposit). */
+    capitalDepositAddress(cointype: string): Promise<CapitalDepositAddressResponse>;
+    /** Binance orderQuote buy variant (POST /api/v2/quote/buy/now). */
+    orderQuoteBuy(cointype: string, amount: number, amounttype: 'coin' | 'aud'): Promise<OrderQuoteResponse>;
+    /** Binance orderQuote sell variant (POST /api/v2/quote/sell/now). */
+    orderQuoteSell(cointype: string, amount: number, amounttype: 'coin' | 'aud'): Promise<OrderQuoteResponse>;
+    /** Binance orderQuote swap variant (POST /api/v2/quote/swap/now). */
+    orderQuoteSwap(cointypesell: string, cointypebuy: string, amount: number): Promise<OrderQuoteResponse>;
+    /** Binance order create for BUY side (POST /api/v2/my/buy). */
+    createOrderBuy(params: NewBuyOrderParams): Promise<NewOrderResponse>;
+    /** Binance order update for BUY side (POST /api/v2/my/buy/edit). */
+    updateOrderBuy(params: UpdateBuyOrderParams): Promise<OrderUpdateBuyResponse>;
+    /** Binance order submit for market BUY (POST /api/v2/my/buy/now). */
+    orderMarketBuyNow(params: MarketBuyNowParams): Promise<OrderExecutionResponse>;
+    /** Binance order create for SELL side (POST /api/v2/my/sell). */
+    createOrderSell(params: NewSellOrderParams): Promise<NewOrderResponse>;
+    /** Binance order update for SELL side (POST /api/v2/my/sell/edit). */
+    updateOrderSell(params: UpdateSellOrderParams): Promise<OrderUpdateSellResponse>;
+    /** Binance order submit for market SELL (POST /api/v2/my/sell/now). */
+    orderMarketSellNow(params: MarketSellNowParams): Promise<OrderExecutionResponse>;
+    /** Binance order submit for swap (POST /api/v2/my/swap/now). */
+    orderSwapNow(params: MarketSwapNowParams): Promise<OrderExecutionResponse>;
+    /** Binance cancelOrder for BUY (POST /api/v2/my/buy/cancel). */
+    cancelOrderBuy(id: string): Promise<CancelOrderResponse>;
+    /** Binance cancelOpenOrders for BUY (POST /api/v2/my/buy/cancel/all). */
+    cancelOpenOrdersBuy(params?: CancelOpenOrdersParams): Promise<CancelOrderResponse>;
+    /** Binance cancelOrder for SELL (POST /api/v2/my/sell/cancel). */
+    cancelOrderSell(id: string): Promise<CancelOrderResponse>;
+    /** Binance cancelOpenOrders for SELL (POST /api/v2/my/sell/cancel/all). */
+    cancelOpenOrdersSell(params?: CancelOpenOrdersParams): Promise<CancelOrderResponse>;
+    /** Binance withdraw details equivalent (POST /api/v2/my/coin/withdraw/senddetails). */
+    withdrawDetails(params: WithdrawDetailsParams): Promise<WithdrawDetailsResponse>;
+    /** Binance withdraw submit (POST /api/v2/my/coin/withdraw/send). */
+    withdraw(params: WithdrawRequestParams): Promise<WithdrawResponse>;
 }
 export declare class CoinspotReadOnlyApi {
     private readonly transport;
@@ -257,33 +259,33 @@ export declare class CoinspotReadOnlyApi {
     private ensureAuth;
     private sign;
     private post;
-    /** Status heartbeat for read-only key (POST /api/v2/ro/status). */
-    getStatus(): Promise<StatusResponse>;
-    /** Order book for a specific market (POST /api/v2/ro/orders/market/open). */
-    getMarketOpenOrders(params: MarketOpenOrdersParams): Promise<ReadOnlyMarketOrdersResponse>;
-    /** Completed market orders with optional filters (POST /api/v2/ro/orders/market/completed). */
-    getMarketCompletedOrders(params: MarketCompletedOrdersParams): Promise<ReadOnlyMarketOrdersWithFeesResponse>;
-    /** All balances for the account (POST /api/v2/ro/my/balances). */
-    getBalances(): Promise<ReadOnlyBalancesResponse>;
-    /** Balance for a specific coin (POST /api/v2/ro/my/balance/{cointype}?available=yes/no). */
-    getBalanceForCoin(params: BalanceForCoinParams): Promise<ReadOnlyBalanceResponse>;
-    /** Open market orders placed by the account (POST /api/v2/ro/my/orders/market/open). */
-    getMyOpenMarketOrders(params: MyOpenMarketOrdersParams): Promise<ReadOnlyMyOpenMarketOrdersResponse>;
-    /** Open limit orders placed by the account (POST /api/v2/ro/my/orders/limit/open). */
-    getMyOpenLimitOrders(params: MyOpenLimitOrdersParams): Promise<ReadOnlyMyOpenLimitOrdersResponse>;
-    /** Completed order history (POST /api/v2/ro/my/orders/completed). */
-    getMyOrdersHistory(params: MyOrdersHistoryParams): Promise<ReadOnlyMyOrdersHistoryResponse>;
-    /** Completed market order history (POST /api/v2/ro/my/orders/market/completed). */
-    getMyMarketOrdersHistory(params: MyOrdersHistoryParams): Promise<ReadOnlyMyMarketOrdersHistoryResponse>;
-    /** Send and receive history (POST /api/v2/ro/my/sendreceive). */
-    getSendReceiveHistory(params: SendReceiveHistoryParams): Promise<ReadOnlySendReceiveResponse>;
-    /** AUD deposit history (POST /api/v2/ro/my/deposits). */
-    getDepositHistory(params: FiatHistoryParams): Promise<ReadOnlyDepositsResponse>;
-    /** AUD withdrawal history (POST /api/v2/ro/my/withdrawals). */
-    getWithdrawalHistory(params: FiatHistoryParams): Promise<ReadOnlyWithdrawalsResponse>;
+    /** Binance account (readonly snapshot) (POST /api/v2/ro/status). */
+    account(): Promise<AccountResponse>;
+    /** Binance depth for market data (POST /api/v2/ro/orders/market/open). */
+    marketDepth(params: DepthParams): Promise<MarketDepthResponse>;
+    /** Binance trades with fees analogue (POST /api/v2/ro/orders/market/completed). */
+    marketTrades(params: MarketTradesParams): Promise<MarketTradesWithFeesResponse>;
+    /** Binance account balances snapshot (POST /api/v2/ro/my/balances). */
+    accountBalances(): Promise<AccountBalancesResponse>;
+    /** Binance asset balance (POST /api/v2/ro/my/balance/{cointype}?available=yes/no). */
+    assetBalance(params: AssetBalanceParams): Promise<AssetBalanceResponse>;
+    /** Binance openOrders (market) (POST /api/v2/ro/my/orders/market/open). */
+    openMarketOrders(params: OpenOrdersParams): Promise<OpenMarketOrdersResponse>;
+    /** Binance openOrders (limit) (POST /api/v2/ro/my/orders/limit/open). */
+    openLimitOrders(params: OpenLimitOrdersParams): Promise<OpenLimitOrdersResponse>;
+    /** Binance allOrders (POST /api/v2/ro/my/orders/completed). */
+    allOrders(params: AllOrdersParams): Promise<AllOrdersResponse>;
+    /** Binance allOrders for market side (POST /api/v2/ro/my/orders/market/completed). */
+    allMarketOrders(params: AllOrdersParams): Promise<AllMarketOrdersResponse>;
+    /** Binance capital transfer history analogue (POST /api/v2/ro/my/sendreceive). */
+    transferHistory(params: TransferHistoryParams): Promise<TransferHistoryResponse>;
+    /** Fiat deposit history (POST /api/v2/ro/my/deposits). */
+    fiatDepositHistory(params: FiatHistoryParams): Promise<FiatDepositHistoryResponse>;
+    /** Fiat withdrawal history (POST /api/v2/ro/my/withdrawals). */
+    fiatWithdrawalHistory(params: FiatHistoryParams): Promise<FiatWithdrawalHistoryResponse>;
     /** Affiliate payments received (POST /api/v2/ro/my/affiliatepayments). */
-    getAffiliatePayments(): Promise<ReadOnlyAffiliatePaymentsResponse>;
+    affiliatePayments(): Promise<AffiliatePaymentsResponse>;
     /** Referral payments received (POST /api/v2/ro/my/referralpayments). */
-    getReferralPayments(): Promise<ReadOnlyReferralPaymentsResponse>;
+    referralPayments(): Promise<ReferralPaymentsResponse>;
 }
 export { CoinspotHttpError, CoinspotSchemaError };
