@@ -36,7 +36,7 @@ components:
           example: ok
     StatusMessage:
       allOf:
-        - $ref: '#/components/schemas/Status'
+        - $ref: "#/components/schemas/Status"
         - type: object
           properties:
             message:
@@ -51,34 +51,34 @@ components:
       type: object
       properties:
         bid:
-          $ref: '#/components/schemas/NumLike'
+          $ref: "#/components/schemas/NumLike"
         ask:
-          $ref: '#/components/schemas/NumLike'
+          $ref: "#/components/schemas/NumLike"
         last:
-          $ref: '#/components/schemas/NumLike'
+          $ref: "#/components/schemas/NumLike"
     PublicPrices:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             prices:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/PricePoint'
+                $ref: "#/components/schemas/PricePoint"
     PublicPriceSingle:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             prices:
-              $ref: '#/components/schemas/PricePoint'
+              $ref: "#/components/schemas/PricePoint"
     LatestRate:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             rate:
-              $ref: '#/components/schemas/NumLike'
+              $ref: "#/components/schemas/NumLike"
             market:
               type: string
               example: BTC/AUD
@@ -103,20 +103,20 @@ components:
         market: BTC/AUD
     OrderBook:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             buyorders:
               type: array
               items:
-                $ref: '#/components/schemas/OrderBookEntry'
+                $ref: "#/components/schemas/OrderBookEntry"
             sellorders:
               type: array
               items:
-                $ref: '#/components/schemas/OrderBookEntry'
+                $ref: "#/components/schemas/OrderBookEntry"
     CompletedOrder:
       allOf:
-        - $ref: '#/components/schemas/OrderBookEntry'
+        - $ref: "#/components/schemas/OrderBookEntry"
         - type: object
           properties:
             solddate:
@@ -134,20 +134,20 @@ components:
               type: number
     CompletedOrders:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             buyorders:
               type: array
               items:
-                $ref: '#/components/schemas/CompletedOrder'
+                $ref: "#/components/schemas/CompletedOrder"
             sellorders:
               type: array
               items:
-                $ref: '#/components/schemas/CompletedOrder'
+                $ref: "#/components/schemas/CompletedOrder"
     DepositAddresses:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             networks:
@@ -161,7 +161,7 @@ components:
                   memo: { type: string }
     Quote:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             rate:
@@ -169,7 +169,7 @@ components:
               example: 130000
     PlacedOrder:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             coin: { type: string }
@@ -179,7 +179,7 @@ components:
             id: { type: string }
     Execution:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             coin: { type: string }
@@ -188,10 +188,10 @@ components:
             total: { type: number }
             rate: { type: number }
     CancelResponse:
-      $ref: '#/components/schemas/StatusMessage'
+      $ref: "#/components/schemas/StatusMessage"
     Balances:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             balances:
@@ -216,29 +216,29 @@ components:
         created: { type: string, format: date-time }
     MyOpenOrders:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             buyorders:
               type: array
-              items: { $ref: '#/components/schemas/MyOrder' }
+              items: { $ref: "#/components/schemas/MyOrder" }
             sellorders:
               type: array
-              items: { $ref: '#/components/schemas/MyOrder' }
+              items: { $ref: "#/components/schemas/MyOrder" }
     MyHistory:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             buyorders:
               type: array
-              items: { $ref: '#/components/schemas/CompletedOrder' }
+              items: { $ref: "#/components/schemas/CompletedOrder" }
             sellorders:
               type: array
-              items: { $ref: '#/components/schemas/CompletedOrder' }
+              items: { $ref: "#/components/schemas/CompletedOrder" }
     SendReceiveHistory:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             sendtransactions:
@@ -265,7 +265,7 @@ components:
                   from: { type: string }
     DepositHistory:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             deposits:
@@ -280,7 +280,7 @@ components:
                   reference: { type: string }
     WithdrawalHistory:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             withdrawals:
@@ -293,7 +293,7 @@ components:
                   status: { type: string }
     PaymentHistory:
       allOf:
-        - $ref: '#/components/schemas/StatusMessage'
+        - $ref: "#/components/schemas/StatusMessage"
         - type: object
           properties:
             payments:
@@ -310,19 +310,25 @@ paths:
     get:
       summary: Latest prices for all coins and markets
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicPrices'
+                $ref: "#/components/schemas/PublicPrices"
               examples:
                 sample:
                   value:
                     status: ok
                     prices:
-                      btc: { bid: "129051.79", ask: "129966.15", last: "130487.3453" }
-                      btc_usdt: { bid: "75000.01", ask: "89009.15", last: "80000" }
+                      btc:
+                        {
+                          bid: "129051.79",
+                          ask: "129966.15",
+                          last: "130487.3453",
+                        }
+                      btc_usdt:
+                        { bid: "75000.01", ask: "89009.15", last: "80000" }
   /latest/{cointype}:
     get:
       summary: Latest price for a specific coin in AUD
@@ -332,12 +338,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicPriceSingle'
+                $ref: "#/components/schemas/PublicPriceSingle"
   /latest/{cointype}/{markettype}:
     get:
       summary: Latest price for a coin/market pair
@@ -351,12 +357,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicPriceSingle'
+                $ref: "#/components/schemas/PublicPriceSingle"
   /buyprice/{cointype}:
     get:
       summary: Latest buy price for a coin in AUD
@@ -366,12 +372,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LatestRate'
+                $ref: "#/components/schemas/LatestRate"
   /sellprice/{cointype}:
     get:
       summary: Latest sell price for a coin in AUD
@@ -381,12 +387,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LatestRate'
+                $ref: "#/components/schemas/LatestRate"
   /orders/open/{cointype}:
     get:
       summary: Top buy/sell book for a coin in AUD
@@ -396,12 +402,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderBook'
+                $ref: "#/components/schemas/OrderBook"
   /orders/completed/{cointype}:
     get:
       summary: Recently completed orders for a coin in AUD
@@ -411,12 +417,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompletedOrders'
+                $ref: "#/components/schemas/CompletedOrders"
 
   # Full access (auth, POST)
   /status:
@@ -433,12 +439,12 @@ paths:
               properties:
                 nonce: { type: integer }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Status'
+                $ref: "#/components/schemas/Status"
   /my/coin/deposit:
     post:
       summary: Deposit addresses for a coin
@@ -455,12 +461,12 @@ paths:
                 nonce: { type: integer }
                 cointype: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DepositAddresses'
+                $ref: "#/components/schemas/DepositAddresses"
   /quote/buy/now:
     post:
       summary: Quote for an instant buy
@@ -481,12 +487,12 @@ paths:
                   type: string
                   enum: [coin, aud]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quote'
+                $ref: "#/components/schemas/Quote"
   /quote/sell/now:
     post:
       summary: Quote for an instant sell
@@ -507,12 +513,12 @@ paths:
                   type: string
                   enum: [coin, aud]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quote'
+                $ref: "#/components/schemas/Quote"
   /quote/swap/now:
     post:
       summary: Quote for an instant swap
@@ -531,12 +537,12 @@ paths:
                 cointypebuy: { type: string }
                 amount: { type: number }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quote'
+                $ref: "#/components/schemas/Quote"
   /my/buy:
     post:
       summary: Place a market buy order
@@ -556,12 +562,12 @@ paths:
                 rate: { type: number }
                 markettype: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlacedOrder'
+                $ref: "#/components/schemas/PlacedOrder"
   /my/sell:
     post:
       summary: Place a market sell order
@@ -581,12 +587,12 @@ paths:
                 rate: { type: number }
                 markettype: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlacedOrder'
+                $ref: "#/components/schemas/PlacedOrder"
   /my/buy/edit:
     post:
       summary: Edit an open buy order
@@ -606,12 +612,12 @@ paths:
                 rate: { type: number }
                 newrate: { type: number }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlacedOrder'
+                $ref: "#/components/schemas/PlacedOrder"
   /my/sell/edit:
     post:
       summary: Edit an open sell order
@@ -631,12 +637,12 @@ paths:
                 rate: { type: number }
                 newrate: { type: number }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlacedOrder'
+                $ref: "#/components/schemas/PlacedOrder"
   /my/buy/now:
     post:
       summary: Execute a buy-now order
@@ -655,12 +661,12 @@ paths:
                 amounttype: { type: string, enum: [coin, aud] }
                 amount: { type: number }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Execution'
+                $ref: "#/components/schemas/Execution"
   /my/sell/now:
     post:
       summary: Execute a sell-now order
@@ -679,12 +685,12 @@ paths:
                 amounttype: { type: string, enum: [coin, aud] }
                 amount: { type: number }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Execution'
+                $ref: "#/components/schemas/Execution"
   /my/swap/now:
     post:
       summary: Execute a swap-now order
@@ -703,12 +709,12 @@ paths:
                 cointypebuy: { type: string }
                 amount: { type: number }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Execution'
+                $ref: "#/components/schemas/Execution"
   /my/buy/cancel:
     post:
       summary: Cancel a market buy order
@@ -725,12 +731,12 @@ paths:
                 nonce: { type: integer }
                 id: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: "#/components/schemas/CancelResponse"
   /my/buy/cancel/all:
     post:
       summary: Cancel all buy orders (optional coin)
@@ -746,12 +752,12 @@ paths:
                 nonce: { type: integer }
                 coin: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: "#/components/schemas/CancelResponse"
   /my/sell/cancel:
     post:
       summary: Cancel a market sell order
@@ -768,12 +774,12 @@ paths:
                 nonce: { type: integer }
                 id: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: "#/components/schemas/CancelResponse"
   /my/sell/cancel/all:
     post:
       summary: Cancel all sell orders (optional coin)
@@ -789,12 +795,12 @@ paths:
                 nonce: { type: integer }
                 coin: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: "#/components/schemas/CancelResponse"
   /my/coin/withdraw/senddetails:
     post:
       summary: Withdrawal network/payment details
@@ -811,12 +817,12 @@ paths:
                 nonce: { type: integer }
                 cointype: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusMessage'
+                $ref: "#/components/schemas/StatusMessage"
   /my/coin/withdraw/send:
     post:
       summary: Send a coin withdrawal
@@ -837,12 +843,12 @@ paths:
                 memo: { type: string }
                 network: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusMessage'
+                $ref: "#/components/schemas/StatusMessage"
 
   # Read-only (auth, POST)
   /my/balances:
@@ -859,12 +865,12 @@ paths:
               properties:
                 nonce: { type: integer }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Balances'
+                $ref: "#/components/schemas/Balances"
   /my/balance/{cointype}:
     post:
       summary: Balance for a specific coin
@@ -889,12 +895,12 @@ paths:
               properties:
                 nonce: { type: integer }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusMessage'
+                $ref: "#/components/schemas/StatusMessage"
   /my/orders/market/open:
     post:
       summary: List my open market orders
@@ -911,12 +917,12 @@ paths:
                 cointype: { type: string }
                 markettype: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MyOpenOrders'
+                $ref: "#/components/schemas/MyOpenOrders"
   /my/orders/limit/open:
     post:
       summary: List my open limit orders
@@ -932,12 +938,12 @@ paths:
                 nonce: { type: integer }
                 cointype: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MyOpenOrders'
+                $ref: "#/components/schemas/MyOpenOrders"
   /my/orders/completed:
     post:
       summary: List completed order history
@@ -957,12 +963,12 @@ paths:
                 enddate: { type: string }
                 limit: { type: integer, default: 200 }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MyHistory'
+                $ref: "#/components/schemas/MyHistory"
   /my/orders/market/completed:
     post:
       summary: List completed market order history
@@ -982,12 +988,12 @@ paths:
                 enddate: { type: string }
                 limit: { type: integer, default: 200 }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MyHistory'
+                $ref: "#/components/schemas/MyHistory"
   /my/sendreceive:
     post:
       summary: Send & receive history
@@ -1004,12 +1010,12 @@ paths:
                 startdate: { type: string }
                 enddate: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendReceiveHistory'
+                $ref: "#/components/schemas/SendReceiveHistory"
   /my/deposits:
     post:
       summary: AUD deposit history
@@ -1026,12 +1032,12 @@ paths:
                 startdate: { type: string }
                 enddate: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DepositHistory'
+                $ref: "#/components/schemas/DepositHistory"
   /my/withdrawals:
     post:
       summary: AUD withdrawal history
@@ -1048,12 +1054,12 @@ paths:
                 startdate: { type: string }
                 enddate: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WithdrawalHistory'
+                $ref: "#/components/schemas/WithdrawalHistory"
   /my/affiliatepayments:
     post:
       summary: Affiliate payment history
@@ -1068,12 +1074,12 @@ paths:
               properties:
                 nonce: { type: integer }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentHistory'
+                $ref: "#/components/schemas/PaymentHistory"
   /my/referralpayments:
     post:
       summary: Referral payment history
@@ -1088,9 +1094,9 @@ paths:
               properties:
                 nonce: { type: integer }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentHistory'
+                $ref: "#/components/schemas/PaymentHistory"
