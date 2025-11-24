@@ -1,4 +1,4 @@
-import { AccountBalancesResponse, AccountResponse, AffiliatePaymentsResponse, AggTradesResponse, AllMarketOrdersResponse, AllOrdersResponse, AssetBalanceResponse, AvgPriceResponse, CancelOrderResponse, CapitalDepositAddressResponse, DepthResponse, FiatDepositHistoryResponse, FiatWithdrawalHistoryResponse, MarketDepthResponse, MarketTradesWithFeesResponse, NewOrderResponse, OpenLimitOrdersResponse, OpenMarketOrdersResponse, OrderExecutionResponse, OrderQuoteResponse, OrderUpdateBuyResponse, OrderUpdateSellResponse, ReferralPaymentsResponse, Ticker24hrResponse, Ticker24hrSymbolResponse, TradesResponse, TransferHistoryResponse, WithdrawDetailsResponse, WithdrawResponse, schemas } from './schemas';
+import { AccountBalancesResponse, AccountResponse, AffiliatePaymentsResponse, AggTradesResponse, AllMarketOrdersResponse, AllOrdersResponse, AssetBalanceResponse, AvgPriceResponse, CancelOrderResponse, CapitalDepositAddressResponse, DepthResponse, FiatDepositHistoryResponse, FiatWithdrawalHistoryResponse, MarketDepthResponse, MarketTradesWithFeesResponse, NewOrderResponse, OpenLimitOrdersResponse, OpenMarketOrdersResponse, OrderExecutionResponse, OrderQuoteResponse, OrderUpdateBuyResponse, OrderUpdateSellResponse, ReferralPaymentsResponse, Ticker24hrResponse, Ticker24hrSymbolResponse, TradesResponse, TransferHistoryResponse, WithdrawDetailsResponse, WithdrawResponse, schemas } from "./schemas";
 export interface CoinspotCredential {
     key: string;
     secret: string;
@@ -43,11 +43,11 @@ export interface UpdateBuyOrderParams {
 }
 export interface MarketBuyNowParams {
     cointype: string;
-    amounttype: 'coin' | 'aud';
+    amounttype: "coin" | "aud";
     amount: number;
     rate?: number;
     threshold?: number;
-    direction?: 'UP' | 'DOWN' | 'BOTH';
+    direction?: "UP" | "DOWN" | "BOTH";
 }
 export interface NewSellOrderParams {
     cointype: string;
@@ -64,11 +64,11 @@ export interface UpdateSellOrderParams {
 }
 export interface MarketSellNowParams {
     cointype: string;
-    amounttype: 'coin' | 'aud';
+    amounttype: "coin" | "aud";
     amount: number;
     rate?: number;
     threshold?: number;
-    direction?: 'UP' | 'DOWN' | 'BOTH';
+    direction?: "UP" | "DOWN" | "BOTH";
 }
 export interface MarketSwapNowParams {
     cointypesell: string;
@@ -76,7 +76,7 @@ export interface MarketSwapNowParams {
     amount: number;
     rate?: number;
     threshold?: number;
-    direction?: 'UP' | 'DOWN' | 'BOTH';
+    direction?: "UP" | "DOWN" | "BOTH";
 }
 export interface CancelOpenOrdersParams {
     coin?: string;
@@ -88,7 +88,7 @@ export interface WithdrawRequestParams {
     cointype: string;
     amount: number;
     address: string;
-    emailconfirm?: 'YES' | 'NO';
+    emailconfirm?: "YES" | "NO";
     network?: string;
     paymentid?: string;
 }
@@ -218,9 +218,9 @@ export declare class CoinspotFullAccessApi {
     /** Binance capitalDepositAddress equivalent (POST /api/v2/my/coin/deposit). */
     capitalDepositAddress(cointype: string): Promise<CapitalDepositAddressResponse>;
     /** Binance orderQuote buy variant (POST /api/v2/quote/buy/now). */
-    orderQuoteBuy(cointype: string, amount: number, amounttype: 'coin' | 'aud'): Promise<OrderQuoteResponse>;
+    orderQuoteBuy(cointype: string, amount: number, amounttype: "coin" | "aud"): Promise<OrderQuoteResponse>;
     /** Binance orderQuote sell variant (POST /api/v2/quote/sell/now). */
-    orderQuoteSell(cointype: string, amount: number, amounttype: 'coin' | 'aud'): Promise<OrderQuoteResponse>;
+    orderQuoteSell(cointype: string, amount: number, amounttype: "coin" | "aud"): Promise<OrderQuoteResponse>;
     /** Binance orderQuote swap variant (POST /api/v2/quote/swap/now). */
     orderQuoteSwap(cointypesell: string, cointypebuy: string, amount: number): Promise<OrderQuoteResponse>;
     /** Binance order create for BUY side (POST /api/v2/my/buy). */

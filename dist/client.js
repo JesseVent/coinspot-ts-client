@@ -9,9 +9,9 @@ const https_1 = __importDefault(require("https"));
 const url_1 = require("url");
 const schemas_1 = require("./schemas");
 const DEFAULT_BASE_URLS = {
-    public: 'https://www.coinspot.com.au/pubapi/v2',
-    private: 'https://www.coinspot.com.au/api/v2',
-    readOnly: 'https://www.coinspot.com.au/api/v2/ro',
+    public: "https://www.coinspot.com.au/pubapi/v2",
+    private: "https://www.coinspot.com.au/api/v2",
+    readOnly: "https://www.coinspot.com.au/api/v2/ro",
 };
 const DEFAULT_RATE_LIMIT = {
     maxRequests: 995,
@@ -44,7 +44,8 @@ class RateLimiter {
     async waitForSlot() {
         while (true) {
             const now = Date.now();
-            while (this.timestamps.length && now - this.timestamps[0] > this.windowMs) {
+            while (this.timestamps.length &&
+                now - this.timestamps[0] > this.windowMs) {
                 this.timestamps.shift();
             }
             if (this.timestamps.length < this.options.maxRequests) {
@@ -61,7 +62,7 @@ class CoinspotHttpError extends Error {
         super(message);
         this.statusCode = statusCode;
         this.responseText = responseText;
-        this.name = 'CoinspotHttpError';
+        this.name = "CoinspotHttpError";
     }
 }
 exports.CoinspotHttpError = CoinspotHttpError;
@@ -70,7 +71,7 @@ class CoinspotSchemaError extends Error {
         super(message);
         this.issues = issues;
         this.payload = payload;
-        this.name = 'CoinspotSchemaError';
+        this.name = "CoinspotSchemaError";
     }
 }
 exports.CoinspotSchemaError = CoinspotSchemaError;
@@ -79,10 +80,10 @@ class CoinspotTransport {
         this.config = config;
     }
     async get(url, schema) {
-        return this.schedule(() => this.retryableRequest('GET', url, undefined, {}, schema));
+        return this.schedule(() => this.retryableRequest("GET", url, undefined, {}, schema));
     }
     async post(url, body, headers, schema) {
-        return this.schedule(() => this.retryableRequest('POST', url, body, headers, schema));
+        return this.schedule(() => this.retryableRequest("POST", url, body, headers, schema));
     }
     schedule(fn) {
         return this.config.rateLimiter.schedule(fn);
@@ -116,13 +117,13 @@ class CoinspotTransport {
         const payload = body ? JSON.stringify(body) : undefined;
         const target = new url_1.URL(url);
         const baseHeaders = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'User-Agent': this.config.userAgent,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": this.config.userAgent,
             ...headers,
         };
         if (payload) {
-            baseHeaders['Content-Length'] = Buffer.byteLength(payload);
+            baseHeaders["Content-Length"] = Buffer.byteLength(payload);
         }
         const requestOptions = {
             method,
@@ -136,9 +137,9 @@ class CoinspotTransport {
         const responseText = await new Promise((resolve, reject) => {
             const req = https_1.default.request(requestOptions, (res) => {
                 const chunks = [];
-                res.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-                res.on('end', () => {
-                    const text = Buffer.concat(chunks).toString('utf8');
+                res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+                res.on("end", () => {
+                    const text = Buffer.concat(chunks).toString("utf8");
                     const statusCode = res.statusCode ?? 0;
                     if (statusCode >= 200 && statusCode < 300) {
                         resolve(text);
@@ -147,9 +148,9 @@ class CoinspotTransport {
                     reject(new CoinspotHttpError(`Coinspot request failed with status ${statusCode}`, statusCode, text));
                 });
             });
-            req.on('error', reject);
-            req.on('timeout', () => {
-                req.destroy(new Error('Coinspot request timed out'));
+            req.on("error", reject);
+            req.on("timeout", () => {
+                req.destroy(new Error("Coinspot request timed out"));
             });
             if (payload) {
                 req.write(payload);
@@ -165,7 +166,7 @@ class CoinspotTransport {
         }
         const parsed = schema.safeParse(json);
         if (!parsed.success) {
-            throw new CoinspotSchemaError('Coinspot response failed schema validation', parsed.error.issues, json);
+            throw new CoinspotSchemaError("Coinspot response failed schema validation", parsed.error.issues, json);
         }
         return parsed.data;
     }
@@ -183,7 +184,7 @@ class CoinspotClient {
             rateLimiter,
             retries: options.retries ?? DEFAULT_RETRIES,
             timeoutMs: options.timeoutMs ?? 15000,
-            userAgent: options.userAgent ?? 'coinspot-ts-client/1.0.0',
+            userAgent: options.userAgent ?? "coinspot-ts-client/1.0.0",
         });
         this.public = new CoinspotPublicApi(this.transport, this.baseUrls.public);
         this.fullAccess = new CoinspotFullAccessApi(this.transport, this.baseUrls.private, this.nonceFactory, options.fullAccess);
@@ -259,15 +260,15 @@ class CoinspotFullAccessApi {
     }
     ensureAuth() {
         if (!this.auth) {
-            throw new Error('Full access API key/secret is required for this call');
+            throw new Error("Full access API key/secret is required for this call");
         }
         return this.auth;
     }
     sign(body, credential) {
         return crypto_1.default
-            .createHmac('sha512', credential.secret)
+            .createHmac("sha512", credential.secret)
             .update(JSON.stringify(body))
-            .digest('hex');
+            .digest("hex");
     }
     async post(path, body, schema) {
         const credential = this.ensureAuth();
@@ -280,91 +281,99 @@ class CoinspotFullAccessApi {
     }
     /** Binance account equivalent (POST /api/v2/status). */
     account() {
-        return this.post('/status', {}, schemas_1.schemas.account);
+        return this.post("/status", {}, schemas_1.schemas.account);
     }
     /** Binance capitalDepositAddress equivalent (POST /api/v2/my/coin/deposit). */
     capitalDepositAddress(cointype) {
-        return this.post('/my/coin/deposit', { cointype }, schemas_1.schemas.capitalDepositAddress);
+        return this.post("/my/coin/deposit", { cointype }, schemas_1.schemas.capitalDepositAddress);
     }
     /** Binance orderQuote buy variant (POST /api/v2/quote/buy/now). */
     orderQuoteBuy(cointype, amount, amounttype) {
-        return this.post('/quote/buy/now', { cointype, amount, amounttype }, schemas_1.schemas.orderQuote);
+        return this.post("/quote/buy/now", { cointype, amount, amounttype }, schemas_1.schemas.orderQuote);
     }
     /** Binance orderQuote sell variant (POST /api/v2/quote/sell/now). */
     orderQuoteSell(cointype, amount, amounttype) {
-        return this.post('/quote/sell/now', { cointype, amount, amounttype }, schemas_1.schemas.orderQuote);
+        return this.post("/quote/sell/now", { cointype, amount, amounttype }, schemas_1.schemas.orderQuote);
     }
     /** Binance orderQuote swap variant (POST /api/v2/quote/swap/now). */
     orderQuoteSwap(cointypesell, cointypebuy, amount) {
-        return this.post('/quote/swap/now', { cointypesell, cointypebuy, amount }, schemas_1.schemas.orderQuote);
+        return this.post("/quote/swap/now", { cointypesell, cointypebuy, amount }, schemas_1.schemas.orderQuote);
     }
     /** Binance order create for BUY side (POST /api/v2/my/buy). */
     createOrderBuy(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/buy', payload, schemas_1.schemas.newOrder);
+        return this.post("/my/buy", payload, schemas_1.schemas.newOrder);
     }
     /** Binance order update for BUY side (POST /api/v2/my/buy/edit). */
     updateOrderBuy(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/buy/edit', payload, schemas_1.schemas.orderUpdateBuy);
+        return this.post("/my/buy/edit", payload, schemas_1.schemas.orderUpdateBuy);
     }
     /** Binance order submit for market BUY (POST /api/v2/my/buy/now). */
     orderMarketBuyNow(params) {
-        return this.post('/my/buy/now', params, schemas_1.schemas.marketBuyExecution);
+        return this.post("/my/buy/now", params, schemas_1.schemas.marketBuyExecution);
     }
     /** Binance order create for SELL side (POST /api/v2/my/sell). */
     createOrderSell(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/sell', payload, schemas_1.schemas.newOrder);
+        return this.post("/my/sell", payload, schemas_1.schemas.newOrder);
     }
     /** Binance order update for SELL side (POST /api/v2/my/sell/edit). */
     updateOrderSell(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/sell/edit', payload, schemas_1.schemas.orderUpdateSell);
+        return this.post("/my/sell/edit", payload, schemas_1.schemas.orderUpdateSell);
     }
     /** Binance order submit for market SELL (POST /api/v2/my/sell/now). */
     orderMarketSellNow(params) {
-        return this.post('/my/sell/now', params, schemas_1.schemas.marketSellExecution);
+        return this.post("/my/sell/now", params, schemas_1.schemas.marketSellExecution);
     }
     /** Binance order submit for swap (POST /api/v2/my/swap/now). */
     orderSwapNow(params) {
-        return this.post('/my/swap/now', params, schemas_1.schemas.marketSwapExecution);
+        return this.post("/my/swap/now", params, schemas_1.schemas.marketSwapExecution);
     }
     /** Binance cancelOrder for BUY (POST /api/v2/my/buy/cancel). */
     cancelOrderBuy(id) {
-        return this.post('/my/buy/cancel', { id }, schemas_1.schemas.cancelOrder);
+        return this.post("/my/buy/cancel", { id }, schemas_1.schemas.cancelOrder);
     }
     /** Binance cancelOpenOrders for BUY (POST /api/v2/my/buy/cancel/all). */
     cancelOpenOrdersBuy(params = {}) {
-        return this.post('/my/buy/cancel/all', params, schemas_1.schemas.cancelOrder);
+        return this.post("/my/buy/cancel/all", params, schemas_1.schemas.cancelOrder);
     }
     /** Binance cancelOrder for SELL (POST /api/v2/my/sell/cancel). */
     cancelOrderSell(id) {
-        return this.post('/my/sell/cancel', { id }, schemas_1.schemas.cancelOrder);
+        return this.post("/my/sell/cancel", { id }, schemas_1.schemas.cancelOrder);
     }
     /** Binance cancelOpenOrders for SELL (POST /api/v2/my/sell/cancel/all). */
     cancelOpenOrdersSell(params = {}) {
-        return this.post('/my/sell/cancel/all', params, schemas_1.schemas.cancelOrder);
+        return this.post("/my/sell/cancel/all", params, schemas_1.schemas.cancelOrder);
     }
     /** Binance withdraw details equivalent (POST /api/v2/my/coin/withdraw/senddetails). */
     withdrawDetails(params) {
-        return this.post('/my/coin/withdraw/senddetails', params, schemas_1.schemas.withdrawDetails);
+        return this.post("/my/coin/withdraw/senddetails", params, schemas_1.schemas.withdrawDetails);
     }
     /** Binance withdraw submit (POST /api/v2/my/coin/withdraw/send). */
     withdraw(params) {
-        return this.post('/my/coin/withdraw/send', params, schemas_1.schemas.withdraw);
+        return this.post("/my/coin/withdraw/send", params, schemas_1.schemas.withdraw);
     }
 }
 exports.CoinspotFullAccessApi = CoinspotFullAccessApi;
@@ -377,15 +386,15 @@ class CoinspotReadOnlyApi {
     }
     ensureAuth() {
         if (!this.auth) {
-            throw new Error('Read-only API key/secret is required for this call');
+            throw new Error("Read-only API key/secret is required for this call");
         }
         return this.auth;
     }
     sign(body, credential) {
         return crypto_1.default
-            .createHmac('sha512', credential.secret)
+            .createHmac("sha512", credential.secret)
             .update(JSON.stringify(body))
-            .digest('hex');
+            .digest("hex");
     }
     async post(path, body, schema) {
         const credential = this.ensureAuth();
@@ -398,81 +407,91 @@ class CoinspotReadOnlyApi {
     }
     /** Binance account (readonly snapshot) (POST /api/v2/ro/status). */
     account() {
-        return this.post('/status', {}, schemas_1.schemas.account);
+        return this.post("/status", {}, schemas_1.schemas.account);
     }
     /** Binance depth for market data (POST /api/v2/ro/orders/market/open). */
     marketDepth(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/orders/market/open', payload, schemas_1.schemas.marketDepth);
+        return this.post("/orders/market/open", payload, schemas_1.schemas.marketDepth);
     }
     /** Binance trades with fees analogue (POST /api/v2/ro/orders/market/completed). */
     marketTrades(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/orders/market/completed', payload, schemas_1.schemas.marketTradesWithFees);
+        return this.post("/orders/market/completed", payload, schemas_1.schemas.marketTradesWithFees);
     }
     /** Binance account balances snapshot (POST /api/v2/ro/my/balances). */
     accountBalances() {
-        return this.post('/my/balances', {}, schemas_1.schemas.accountBalances);
+        return this.post("/my/balances", {}, schemas_1.schemas.accountBalances);
     }
     /** Binance asset balance (POST /api/v2/ro/my/balance/{cointype}?available=yes/no). */
     assetBalance(params) {
         const { cointype, available } = params;
-        const query = available !== undefined ? `?available=${available ? 'yes' : 'no'}` : '';
+        const query = available !== undefined ? `?available=${available ? "yes" : "no"}` : "";
         return this.post(`/my/balance/${encodeURIComponent(cointype)}${query}`, {}, schemas_1.schemas.assetBalance);
     }
     /** Binance openOrders (market) (POST /api/v2/ro/my/orders/market/open). */
     openMarketOrders(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/orders/market/open', payload, schemas_1.schemas.openMarketOrders);
+        return this.post("/my/orders/market/open", payload, schemas_1.schemas.openMarketOrders);
     }
     /** Binance openOrders (limit) (POST /api/v2/ro/my/orders/limit/open). */
     openLimitOrders(params) {
-        return this.post('/my/orders/limit/open', params, schemas_1.schemas.openLimitOrders);
+        return this.post("/my/orders/limit/open", params, schemas_1.schemas.openLimitOrders);
     }
     /** Binance allOrders (POST /api/v2/ro/my/orders/completed). */
     allOrders(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/orders/completed', payload, schemas_1.schemas.allOrders);
+        return this.post("/my/orders/completed", payload, schemas_1.schemas.allOrders);
     }
     /** Binance allOrders for market side (POST /api/v2/ro/my/orders/market/completed). */
     allMarketOrders(params) {
         const payload = {
             ...params,
-            markettype: params.markettype ? normalizeMarket(params.markettype) : undefined,
+            markettype: params.markettype
+                ? normalizeMarket(params.markettype)
+                : undefined,
         };
-        return this.post('/my/orders/market/completed', payload, schemas_1.schemas.allMarketOrders);
+        return this.post("/my/orders/market/completed", payload, schemas_1.schemas.allMarketOrders);
     }
     /** Binance capital transfer history analogue (POST /api/v2/ro/my/sendreceive). */
     transferHistory(params) {
-        return this.post('/my/sendreceive', params, schemas_1.schemas.transferHistory);
+        return this.post("/my/sendreceive", params, schemas_1.schemas.transferHistory);
     }
     /** Fiat deposit history (POST /api/v2/ro/my/deposits). */
     fiatDepositHistory(params) {
-        return this.post('/my/deposits', params, schemas_1.schemas.fiatDepositHistory);
+        return this.post("/my/deposits", params, schemas_1.schemas.fiatDepositHistory);
     }
     /** Fiat withdrawal history (POST /api/v2/ro/my/withdrawals). */
     fiatWithdrawalHistory(params) {
-        return this.post('/my/withdrawals', params, schemas_1.schemas.fiatWithdrawalHistory);
+        return this.post("/my/withdrawals", params, schemas_1.schemas.fiatWithdrawalHistory);
     }
     /** Affiliate payments received (POST /api/v2/ro/my/affiliatepayments). */
     affiliatePayments() {
-        return this.post('/my/affiliatepayments', {}, schemas_1.schemas.affiliatePayments);
+        return this.post("/my/affiliatepayments", {}, schemas_1.schemas.affiliatePayments);
     }
     /** Referral payments received (POST /api/v2/ro/my/referralpayments). */
     referralPayments() {
-        return this.post('/my/referralpayments', {}, schemas_1.schemas.referralPayments);
+        return this.post("/my/referralpayments", {}, schemas_1.schemas.referralPayments);
     }
 }
 exports.CoinspotReadOnlyApi = CoinspotReadOnlyApi;

@@ -9,9 +9,9 @@ const statusMessageSchema = statusBaseSchema.extend({
     message: zod_1.z.string().optional(),
 });
 const coerceNumber = (schema) => zod_1.z.preprocess((val) => {
-    if (val === 'NaN')
+    if (val === "NaN")
         return null;
-    if (typeof val === 'string') {
+    if (typeof val === "string") {
         const n = Number(val);
         return Number.isNaN(n) ? val : n;
     }

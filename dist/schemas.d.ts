@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 export declare const schemas: {
     account: z.ZodObject<{
         status: z.ZodString;

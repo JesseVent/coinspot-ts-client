@@ -1,11 +1,23 @@
-# CoinSpot v2 TypeScript client
+# CoinSpot v2 TypeScript Client
 
 Modern, typed client for the CoinSpot v2 API with retries, per-minute rate limiting, and zod-powered runtime validation. Public, full-access, and read-only APIs are all supported with matching endpoints.
 
-## Quick start
+## Installation
+
+```bash
+npm install coinspot-ts-client
+```
+
+or
+
+```bash
+pnpm add coinspot-ts-client
+```
+
+## Quick Start
 
 ```ts
-import { CoinspotClient } from './src/coinspot';
+import { CoinspotClient } from 'coinspot-ts-client';
 
 const client = new CoinspotClient({
   fullAccess: { key: process.env.COINSPOT_KEY!, secret: process.env.COINSPOT_SECRET! },
@@ -21,237 +33,148 @@ async function run() {
 }
 ```
 
-## Common Trading Examples
+## API Methods Overview
 
-### Get Market Information
-```ts
-// Get latest prices for all coins
-const prices = await client.public.getLatestPrices();
+The client provides three API interfaces: `client.public`, `client.fullAccess`, and `client.readOnly`.
 
-// Get latest price for specific coin (AUD market)
-const btcPrice = await client.public.getLatestPricesForCoin('BTC');
+### Public API Methods (`client.public`)
 
-// Get latest price for specific coin/market pair (e.g., BTC/USDT)
-const btcUsdtPrice = await client.public.getLatestPricesForCoinMarket('BTC', 'USDT');
+The public API provides access to market data without authentication:
 
-// Get buy/sell prices
-const buyPrice = await client.public.getLatestBuyPrice('BTC');
-const sellPrice = await client.public.getLatestSellPrice('BTC');
+- `ticker24hr()` - Get 24-hour price change statistics for all markets
+- `ticker24hrForSymbol(symbol)` - Get 24-hour price change statistics for a specific symbol
+- `ticker24hrForMarket(symbol, quote)` - Get 24-hour price change for a symbol/quote pair
+- `avgPrice(symbol)` - Get average price for a symbol (using buy price)
+- `avgPriceForMarket(symbol, quote)` - Get average price for a symbol/quote market
+- `bookTickerBid(symbol)` - Get bid price for a symbol (using CoinSpot sell price)
+- `bookTickerBidForMarket(symbol, quote)` - Get bid price for a symbol/quote market
+- `depth(symbol)` - Get order book depth for AUD market
+- `depthForMarket(symbol, quote)` - Get order book depth for a symbol/quote market
+- `trades(symbol)` - Get recent trades for a symbol
+- `tradesForMarket(symbol, quote)` - Get recent trades for a symbol/quote market
+- `aggTrades(symbol)` - Get aggregated trade summary for a symbol
+- `aggTradesForMarket(symbol, quote)` - Get aggregated trade summary for a symbol/quote market
 
-// Get market order book
-const orderBook = await client.public.getOpenOrders('BTC');
-```
+### Full Access API Methods (`client.fullAccess`)
 
-### Account Management
-```ts
-// Get all account balances
-const balances = await client.readOnly.getBalances();
+The full access API provides trading functionality and requires authentication:
 
-// Get balance for specific coin
-const btcBalance = await client.readOnly.getBalanceForCoin({ cointype: 'BTC' });
+#### Account Methods
+- `account()` - Get account status and information
 
-// Get deposit addresses for a coin
-const depositAddresses = await client.fullAccess.getDepositAddresses('BTC');
+#### Deposit & Withdrawal Methods
+- `capitalDepositAddress(cointype)` - Get deposit address for a coin type
 
-// Get withdrawal details/networks
-const withdrawalDetails = await client.fullAccess.getWithdrawalDetails({ cointype: 'BTC' });
-```
+#### Order Quote Methods
+- `orderQuoteBuy(cointype, amount, amounttype)` - Get quote for buying
+- `orderQuoteSell(cointype, amount, amounttype)` - Get quote for selling
+- `orderQuoteSwap(cointypesell, cointypebuy, amount)` - Get quote for swapping
 
-### Trading Operations
-```ts
-// Get quote before placing order
-const buyQuote = await client.fullAccess.getBuyNowQuote('BTC', 100, 'aud');
-const sellQuote = await client.fullAccess.getSellNowQuote('BTC', 0.5, 'coin');
+#### Order Placement Methods
+- `createOrderBuy(params)` - Create a buy order
+- `updateOrderBuy(params)` - Update an existing buy order
+- `orderMarketBuyNow(params)` - Place a market buy order
+- `createOrderSell(params)` - Create a sell order
+- `updateOrderSell(params)` - Update an existing sell order
+- `orderMarketSellNow(params)` - Place a market sell order
+- `orderSwapNow(params)` - Place a swap order
 
-// Place a market buy order
-const buyOrder = await client.fullAccess.placeMarketBuyOrder({
-  cointype: 'BTC',
-  amount: 0.1,
-  rate: buyQuote.rate // or your desired rate
-});
+#### Order Cancellation Methods
+- `cancelOrderBuy(id)` - Cancel a buy order
+- `cancelOpenOrdersBuy(params?)` - Cancel all buy orders
+- `cancelOrderSell(id)` - Cancel a sell order
+- `cancelOpenOrdersSell(params?)` - Cancel all sell orders
 
-// Place a market sell order
-const sellOrder = await client.fullAccess.placeMarketSellOrder({
-  cointype: 'BTC',
-  amount: 0.05,
-  rate: sellQuote.rate // or your desired rate
-});
+#### Withdrawal Methods
+- `withdrawDetails(params)` - Get withdrawal details for a coin type
+- `withdraw(params)` - Submit a withdrawal request
 
-// Execute instant buy now
-const buyNow = await client.fullAccess.placeBuyNowOrder({
-  cointype: 'BTC',
-  amounttype: 'aud',
-  amount: 100
-});
+### Read-Only API Methods (`client.readOnly`)
 
-// Execute instant sell now
-const sellNow = await client.fullAccess.placeSellNowOrder({
-  cointype: 'BTC',
-  amounttype: 'coin',
-  amount: 0.01
-});
+The read-only API provides account and transaction history without trading permissions:
 
-// Cancel an order
-await client.fullAccess.cancelBuyOrder('ORDER_ID');
-await client.fullAccess.cancelSellOrder('ORDER_ID');
+#### Account Methods
+- `account()` - Get account status and information
+- `accountBalances()` - Get all account balances
+- `assetBalance(params)` - Get balance for a specific asset
 
-// Cancel all orders for a coin
-await client.fullAccess.cancelAllBuyOrders({ coin: 'BTC' });
-await client.fullAccess.cancelAllSellOrders({ coin: 'BTC' });
-```
+#### Order Methods
+- `marketDepth(params)` - Get market order book depth
+- `openMarketOrders(params)` - Get open market orders
+- `openLimitOrders(params)` - Get open limit orders
+- `allOrders(params)` - Get all historical orders
+- `allMarketOrders(params)` - Get all historical market orders
 
-### Order History & Management
-```ts
-// Get open market orders for account
-const openMarketOrders = await client.readOnly.getMyOpenMarketOrders({ cointype: 'BTC' });
+#### Transaction History Methods
+- `marketTrades(params)` - Get market trades with fees
+- `transferHistory(params)` - Get send/receive history
+- `fiatDepositHistory(params)` - Get fiat deposit history
+- `fiatWithdrawalHistory(params)` - Get fiat withdrawal history
+- `affiliatePayments()` - Get affiliate payments received
+- `referralPayments()` - Get referral payments received
 
-// Get open limit orders
-const openLimitOrders = await client.readOnly.getMyOpenLimitOrders({ cointype: 'BTC' });
+## API Endpoints Mapping
 
-// Get order history
-const orderHistory = await client.readOnly.getMyOrdersHistory({
-  cointype: 'BTC',
-  startdate: '2023-01-01',
-  enddate: '2023-12-31',
-  limit: 100
-});
+### Public API Endpoints
+- `GET /pubapi/v2/latest` → `client.public.ticker24hr()`
+- `GET /pubapi/v2/latest/{cointype}` → `client.public.ticker24hrForSymbol(symbol)`
+- `GET /pubapi/v2/latest/{cointype}/{markettype}` → `client.public.ticker24hrForMarket(symbol, quote)`
+- `GET /pubapi/v2/buyprice/{cointype}` → `client.public.avgPrice(symbol)`
+- `GET /pubapi/v2/buyprice/{cointype}/{markettype}` → `client.public.avgPriceForMarket(symbol, quote)`
+- `GET /pubapi/v2/sellprice/{cointype}` → `client.public.bookTickerBid(symbol)`
+- `GET /pubapi/v2/sellprice/{cointype}/{markettype}` → `client.public.bookTickerBidForMarket(symbol, quote)`
+- `GET /pubapi/v2/orders/open/{cointype}` → `client.public.depth(symbol)`
+- `GET /pubapi/v2/orders/open/{cointype}/{markettype}` → `client.public.depthForMarket(symbol, quote)`
+- `GET /pubapi/v2/orders/completed/{cointype}` → `client.public.trades(symbol)`
+- `GET /pubapi/v2/orders/completed/{cointype}/{markettype}` → `client.public.tradesForMarket(symbol, quote)`
+- `GET /pubapi/v2/orders/summary/completed/{cointype}` → `client.public.aggTrades(symbol)`
+- `GET /pubapi/v2/orders/summary/completed/{cointype}/{markettype}` → `client.public.aggTradesForMarket(symbol, quote)`
 
-// Get completed market orders
-const completedMarketOrders = await client.readOnly.getMyMarketOrdersHistory({
-  cointype: 'BTC'
-});
-```
+### Full Access API Endpoints
+- `POST /api/v2/status` → `client.fullAccess.account()`
+- `POST /api/v2/my/coin/deposit` → `client.fullAccess.capitalDepositAddress(cointype)`
+- `POST /api/v2/quote/buy/now` → `client.fullAccess.orderQuoteBuy(cointype, amount, amounttype)`
+- `POST /api/v2/quote/sell/now` → `client.fullAccess.orderQuoteSell(cointype, amount, amounttype)`
+- `POST /api/v2/quote/swap/now` → `client.fullAccess.orderQuoteSwap(cointypesell, cointypebuy, amount)`
+- `POST /api/v2/my/buy` → `client.fullAccess.createOrderBuy(params)`
+- `POST /api/v2/my/buy/edit` → `client.fullAccess.updateOrderBuy(params)`
+- `POST /api/v2/my/buy/now` → `client.fullAccess.orderMarketBuyNow(params)`
+- `POST /api/v2/my/sell` → `client.fullAccess.createOrderSell(params)`
+- `POST /api/v2/my/sell/edit` → `client.fullAccess.updateOrderSell(params)`
+- `POST /api/v2/my/sell/now` → `client.fullAccess.orderMarketSellNow(params)`
+- `POST /api/v2/my/swap/now` → `client.fullAccess.orderSwapNow(params)`
+- `POST /api/v2/my/buy/cancel` → `client.fullAccess.cancelOrderBuy(id)`
+- `POST /api/v2/my/buy/cancel/all` → `client.fullAccess.cancelOpenOrdersBuy(params?)`
+- `POST /api/v2/my/sell/cancel` → `client.fullAccess.cancelOrderSell(id)`
+- `POST /api/v2/my/sell/cancel/all` → `client.fullAccess.cancelOpenOrdersSell(params?)`
+- `POST /api/v2/my/coin/withdraw/senddetails` → `client.fullAccess.withdrawDetails(params)`
+- `POST /api/v2/my/coin/withdraw/send` → `client.fullAccess.withdraw(params)`
 
-### Transfer Operations
-```ts
-// Send coins to an address
-const sendResult = await client.fullAccess.sendCoins({
-  cointype: 'BTC',
-  amount: 0.1,
-  address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
-  emailconfirm: 'YES' // optional
-});
+### Read-Only API Endpoints
+- `POST /api/v2/ro/status` → `client.readOnly.account()`
+- `POST /api/v2/ro/orders/market/open` → `client.readOnly.marketDepth(params)`
+- `POST /api/v2/ro/orders/market/completed` → `client.readOnly.marketTrades(params)`
+- `POST /api/v2/ro/my/balances` → `client.readOnly.accountBalances()`
+- `POST /api/v2/ro/my/balance/{cointype}` → `client.readOnly.assetBalance(params)` (with optional available parameter)
+- `POST /api/v2/ro/my/orders/market/open` → `client.readOnly.openMarketOrders(params)`
+- `POST /api/v2/ro/my/orders/limit/open` → `client.readOnly.openLimitOrders(params)`
+- `POST /api/v2/ro/my/orders/completed` → `client.readOnly.allOrders(params)`
+- `POST /api/v2/ro/my/orders/market/completed` → `client.readOnly.allMarketOrders(params)`
+- `POST /api/v2/ro/my/sendreceive` → `client.readOnly.transferHistory(params)`
+- `POST /api/v2/ro/my/deposits` → `client.readOnly.fiatDepositHistory(params)`
+- `POST /api/v2/ro/my/withdrawals` → `client.readOnly.fiatWithdrawalHistory(params)`
+- `POST /api/v2/ro/my/affiliatepayments` → `client.readOnly.affiliatePayments()`
+- `POST /api/v2/ro/my/referralpayments` → `client.readOnly.referralPayments()`
 
-// Get send/receive history
-const history = await client.readOnly.getSendReceiveHistory({
-  startdate: '2023-01-01',
-  enddate: '2023-12-31'
-});
-```
+## Schema Normalization
 
-### Exchange Service Integration Examples
+The client includes a schema-normalizer module that provides utilities to map CoinSpot API responses to Binance-like shapes for use with generic adapters. This is particularly useful when integrating with systems built for Binance's API format.
 
-For a generic exchange service, common operations include:
-
-**Balance Query:**
-```ts
-async function getAccountBalances() {
-  try {
-    const balances = await client.readOnly.getBalances();
-    return balances.balances.map(b => ({
-      asset: b.coin,
-      free: b.available || 0,
-      locked: b.balance - (b.available || 0),
-      total: b.balance
-    }));
-  } catch (error) {
-    console.error('Error fetching balances:', error);
-    throw error;
-  }
-}
-```
-
-**Place Order:**
-```ts
-async function placeOrder(symbol: string, side: 'buy' | 'sell', amount: number, price?: number) {
-  const [baseAsset, quoteAsset] = symbol.split('/');
-
-  if (side === 'buy') {
-    if (price) {
-      // Limit order
-      return await client.fullAccess.placeMarketBuyOrder({
-        cointype: baseAsset,
-        amount: amount,
-        rate: price
-      });
-    } else {
-      // Market order
-      return await client.fullAccess.placeBuyNowOrder({
-        cointype: baseAsset,
-        amounttype: 'aud',
-        amount: amount
-      });
-    }
-  } else {
-    if (price) {
-      // Limit order
-      return await client.fullAccess.placeMarketSellOrder({
-        cointype: baseAsset,
-        amount: amount,
-        rate: price
-      });
-    } else {
-      // Market order
-      return await client.fullAccess.placeSellNowOrder({
-        cointype: baseAsset,
-        amounttype: 'coin',
-        amount: amount
-      });
-    }
-  }
-}
-```
-
-**Get Ticker:**
-```ts
-async function getTicker(symbol: string) {
-  const [baseAsset, quoteAsset] = symbol.split('/');
-
-  if (quoteAsset && quoteAsset.toLowerCase() !== 'aud') {
-    const prices = await client.public.getLatestPricesForCoinMarket(baseAsset, quoteAsset.toLowerCase());
-    return {
-      symbol: symbol,
-      bid: prices.prices.bid,
-      ask: prices.prices.ask,
-      last: prices.prices.last,
-      timestamp: Date.now()
-    };
-  } else {
-    const prices = await client.public.getLatestPricesForCoin(baseAsset);
-    return {
-      symbol: symbol,
-      bid: prices.prices.bid,
-      ask: prices.prices.ask,
-      last: prices.prices.last,
-      timestamp: Date.now()
-    };
-  }
-}
-```
-
-**Get Order Book:**
-```ts
-async function getOrderBook(symbol: string, limit?: number) {
-  const [baseAsset] = symbol.split('/');
-  const book = await client.public.getOpenOrders(baseAsset);
-
-  // Sort and limit if needed
-  const asks = book.sellorders
-    .sort((a, b) => a.rate - b.rate) // ascending for asks
-    .slice(0, limit);
-
-  const bids = book.buyorders
-    .sort((a, b) => b.rate - a.rate) // descending for bids
-    .slice(0, limit);
-
-  return {
-    symbol: symbol,
-    asks: asks.map(o => [o.rate, o.amount]),
-    bids: bids.map(o => [o.rate, o.amount]),
-    timestamp: Date.now()
-  };
-}
-```
+Available normalization functions:
+- `toBinanceDepth()` - Maps CoinSpot depth responses to Binance depth format
+- `toBinanceTrades()` - Maps CoinSpot trade responses to Binance recent trades format
+- `toBinanceAggTrades()` - Maps CoinSpot trade responses to Binance aggregate trades format
+- `toBinanceBalances()` - Maps CoinSpot balance responses to Binance account balances format
 
 ## Features
 
@@ -260,52 +183,38 @@ async function getOrderBook(symbol: string, limit?: number) {
 - Rate limiting matching CoinSpot guidance (default: 995 requests/60s) across all public/private/RO calls.
 - Automatic nonce injection and HMAC-SHA512 signing for authenticated requests.
 - Small surface area: `client.public`, `client.fullAccess`, and `client.readOnly`.
-- Request/response types are exported for every method (e.g. `NewBuyOrderParams`, `AccountBalancesResponse`); run `pnpm tsc --emitDeclarationOnly --declaration --outDir dist-types` if you want standalone `.d.ts` emission.
 - Public market endpoints are case-sensitive on the `markettype` path segment; use lowercase (e.g. `usdt`) to avoid 404s.
 - Public price/buy/sell endpoints sometimes return numeric fields as strings (and even `"NaN"` for thin pairs); schemas coerce to `number | null`. If you need strict numbers, re-normalize downstream.
 
-Install dependencies in this repo:
+## Error Handling
+
+- `CoinspotHttpError`: Non-2xx HTTP status, includes `statusCode` and `responseText`.
+- `CoinspotSchemaError`: Response body failed zod validation, includes `issues` and raw `payload`.
+
+Both are exported from `client.ts` and can be caught explicitly.
+
+## Development
+
+Install dependencies:
 
 ```sh
 pnpm install
 ```
 
-## Config options
+Build the project:
 
-`CoinspotClientOptions` (all optional):
+```sh
+pnpm run build
+```
 
-- `fullAccess` / `readOnly`: `{ key: string; secret: string }` credentials.
-- `baseUrls`: override public/private/read-only base URLs if needed.
-- `rateLimit`: `{ maxRequests: number; perSeconds: number }`.
-- `retries`: `{ maxRetries: number; minDelayMs: number; maxDelayMs: number; backoffFactor: number }`.
-- `nonceFactory`: custom nonce generator (default: `Date.now()`).
-- `timeoutMs`: request timeout in milliseconds (default: 15000).
-- `userAgent`: user agent header (default: `coinspot-ts-client/1.0.0`).
+Run type checking:
 
-## Endpoint map
+```sh
+pnpm run compile
+```
 
-- **Public (`client.public`)**: latest prices, buy/sell price, open/completed orders (with/without markets), summaries.
-- **Full access (`client.fullAccess`)**: status, deposit addresses, buy/sell/swap quotes, market buy/sell, buy-now/sell-now/swap-now, edit/cancel orders, withdrawal details, and send coins.
-- **Read only (`client.readOnly`)**: status, market order books/history, balances, per-coin balance, open/limit orders, completed orders (market and full), send/receive, deposits, withdrawals, affiliate payments, referral payments.
+Format code:
 
-Each method includes a docstring with the HTTP path it targets; responses are typed via exported zod schemas in `src/coinspot/schemas.ts`.
-
-## Documentation
-
-This repository includes comprehensive documentation:
-
-- API reference: OpenAPI specification in both YAML (`coinspot_openapi.yaml`) and JSON (`docs/coinspot-ts-client.json`) formats
-- Sample responses: Real API responses in `docs/api-samples/`
-- Client usage: This file and the source code
-- Generated resources: Code and docs in `generated/` directory (excluded from version control)
-
-## Generated Code
-
-This repository also contains an OpenAPI specification (`coinspot_openapi.yaml`) which can be used to generate client libraries and server stubs for other languages. Generated code is organized in the `generated/` directory and excluded from version control (see `generated/README.md`).
-
-## Error handling
-
-- `CoinspotHttpError`: non-2xx HTTP status, includes `statusCode` and `responseText`.
-- `CoinspotSchemaError`: response body failed zod validation, includes `issues` and raw `payload`.
-
-Both are exported from `src/coinspot/client.ts` and can be caught explicitly.
+```sh
+pnpm run format
+```

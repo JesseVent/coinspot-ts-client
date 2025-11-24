@@ -3,10 +3,6 @@ node_modules/
 .pnpm-store/
 node_modules/**/*
 
-# Build outputs
-dist/
-*.tsbuildinfo
-
 # Environment variables
 .env
 .env.local
@@ -100,10 +96,8 @@ generated/
 # API probe outputs (personal/private API responses)
 docs/api-samples/
 probe_output/
-dist/
 AGENTS.md
 
-dist/
 docs/
 QWEN.md
 
