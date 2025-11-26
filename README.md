@@ -16,6 +16,8 @@ pnpm add coinspot-ts-client
 
 ## Quick Start
 
+### Using CoinspotClient
+
 ```ts
 import { CoinspotClient } from 'coinspot-ts-client';
 
@@ -26,12 +28,35 @@ const client = new CoinspotClient({
 });
 
 async function run() {
-  const prices = await client.public.getLatestPrices();
-  const balances = await client.readOnly.getBalances();
-  const buyQuote = await client.fullAccess.getBuyNowQuote('BTC', 100, 'aud');
-  console.log(prices.prices.btc, balances.balances.length, buyQuote.rate);
+  const prices = await client.public.ticker24hr();
+  const balances = await client.readOnly.accountBalances();
+  const buyQuote = await client.fullAccess.orderQuoteBuy('BTC', 100, 'aud');
+  console.log(prices, balances, buyQuote);
 }
 ```
+
+### Using BinanceClient (Alternative)
+
+For developers familiar with Binance's API, the `BinanceClient` provides an identical interface:
+
+```ts
+import { BinanceClient } from 'coinspot-ts-client';
+
+const client = new BinanceClient({
+  fullAccess: { key: process.env.COINSPOT_KEY!, secret: process.env.COINSPOT_SECRET! },
+  readOnly: { key: process.env.COINSPOT_RO_KEY!, secret: process.env.COINSPOT_RO_SECRET! },
+});
+
+async function run() {
+  // Same methods as CoinspotClient - just an alternative entry point
+  const ticker = await client.public.ticker24hr();
+  const depth = await client.public.depth('BTC');
+  const trades = await client.public.trades('ETH');
+  console.log(ticker, depth, trades);
+}
+```
+
+> **Note:** `BinanceClient` is a thin wrapper around `CoinspotClient` and provides the exact same Binance-compatible API methods. Choose either client based on your preference - they are functionally identical.
 
 ## API Methods Overview
 
