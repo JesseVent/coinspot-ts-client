@@ -12,6 +12,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["*.ts", "binance-schemas.ts", "binance-wrapper.ts", "client.ts", "index.ts", "schema-normalizer.ts", "schemas.ts"],
+  "exclude": ["dist", "node_modules", "scripts"]
 }

@@ -1,22 +1,23 @@
 /**
- * Binance-compatible wrapper for CoinSpot API
+ * Wrapped client for CoinSpot API
  *
- * This module provides a Binance Spot API compatible interface that wraps
- * the CoinSpot client. Since the CoinspotClient already provides Binance-style
- * method names, this wrapper simply delegates to those methods for consistency.
+ * This module provides a thin wrapper around CoinspotClient that exposes
+ * the same Binance-compatible API interface. The CoinspotClient already
+ * provides Binance-style method names, so this wrapper simply delegates
+ * to those methods for consistency.
  */
 
 import { CoinspotClient, CoinspotClientOptions } from './client';
 
 /**
- * Main Binance-compatible client wrapper
+ * Wrapped client that delegates to CoinspotClient
  *
  * This is a thin wrapper around CoinspotClient that exposes the same
- * Binance-compatible API interface. The CoinspotClient already provides
- * Binance-style method names, so this wrapper primarily serves as an
- * alternative entry point with explicit Binance naming.
+ * Binance-compatible API interface. Use this if you prefer a wrapped
+ * client pattern, or use CoinspotClient directly - they are functionally
+ * identical.
  */
-export class BinanceClient {
+export class WrappedClient {
   readonly public: typeof this.coinspot.public;
   readonly fullAccess: typeof this.coinspot.fullAccess;
   readonly readOnly: typeof this.coinspot.readOnly;
@@ -31,6 +32,16 @@ export class BinanceClient {
 }
 
 // Re-export the API classes for convenience
+export { CoinspotPublicApi as WrappedPublicApi } from './client';
+export { CoinspotFullAccessApi as WrappedFullAccessApi } from './client';
+export { CoinspotReadOnlyApi as WrappedReadOnlyApi } from './client';
+
+// Legacy exports for backward compatibility (deprecated)
+/** @deprecated Use WrappedClient instead */
+export { WrappedClient as BinanceClient };
+/** @deprecated Use WrappedPublicApi instead */
 export { CoinspotPublicApi as BinancePublicApi } from './client';
+/** @deprecated Use WrappedFullAccessApi instead */
 export { CoinspotFullAccessApi as BinanceFullAccessApi } from './client';
+/** @deprecated Use WrappedReadOnlyApi instead */
 export { CoinspotReadOnlyApi as BinanceReadOnlyApi } from './client';

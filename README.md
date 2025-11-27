@@ -35,14 +35,14 @@ async function run() {
 }
 ```
 
-### Using BinanceClient (Alternative)
+### Using WrappedClient (Alternative)
 
-For developers familiar with Binance's API, the `BinanceClient` provides an identical interface:
+If you prefer a wrapped client pattern, `WrappedClient` provides an identical interface to `CoinspotClient`:
 
 ```ts
-import { BinanceClient } from 'coinspot-ts-client';
+import { WrappedClient } from 'coinspot-ts-client';
 
-const client = new BinanceClient({
+const client = new WrappedClient({
   fullAccess: { key: process.env.COINSPOT_KEY!, secret: process.env.COINSPOT_SECRET! },
   readOnly: { key: process.env.COINSPOT_RO_KEY!, secret: process.env.COINSPOT_RO_SECRET! },
 });
@@ -56,7 +56,9 @@ async function run() {
 }
 ```
 
-> **Note:** `BinanceClient` is a thin wrapper around `CoinspotClient` and provides the exact same Binance-compatible API methods. Choose either client based on your preference - they are functionally identical.
+> **Note:** `WrappedClient` is a thin wrapper around `CoinspotClient` and provides the exact same Binance-compatible API methods. Choose either client based on your preference - they are functionally identical.
+>
+> **Deprecated:** The `BinanceClient` export still exists for backward compatibility but is deprecated. Use `WrappedClient` instead.
 
 ## API Methods Overview
 

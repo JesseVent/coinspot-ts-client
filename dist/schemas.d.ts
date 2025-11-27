@@ -118,10 +118,10 @@ export declare const schemas: {
             coin: z.ZodString;
             market: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }, {
             coin: string;
@@ -137,10 +137,10 @@ export declare const schemas: {
             coin: z.ZodString;
             market: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }, {
             coin: string;
@@ -152,17 +152,17 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }[];
         sellorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }[];
         message?: string | undefined;
@@ -198,10 +198,10 @@ export declare const schemas: {
         } & {
             solddate: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
             solddate?: string | undefined;
         }, {
@@ -221,10 +221,10 @@ export declare const schemas: {
         } & {
             solddate: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
             solddate?: string | undefined;
         }, {
@@ -238,18 +238,18 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
             solddate?: string | undefined;
         }[];
         sellorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
             solddate?: string | undefined;
         }[];
@@ -288,10 +288,10 @@ export declare const schemas: {
         } & {
             solddate: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
             solddate?: string | undefined;
         }, {
@@ -305,10 +305,10 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         orders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
             solddate?: string | undefined;
         }[];
@@ -336,31 +336,31 @@ export declare const schemas: {
             address: z.ZodString;
             memo: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            name: string;
-            network: string;
             address: string;
+            network: string;
+            name: string;
             memo?: string | undefined;
         }, {
-            name: string;
-            network: string;
             address: string;
+            network: string;
+            name: string;
             memo?: string | undefined;
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         status: string;
         networks: {
-            name: string;
-            network: string;
             address: string;
+            network: string;
+            name: string;
             memo?: string | undefined;
         }[];
         message?: string | undefined;
     }, {
         status: string;
         networks: {
-            name: string;
-            network: string;
             address: string;
+            network: string;
+            name: string;
             memo?: string | undefined;
         }[];
         message?: string | undefined;
@@ -392,17 +392,17 @@ export declare const schemas: {
         id: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         status: string;
+        id: string;
+        coin: string;
         amount: number;
         rate: number;
-        coin: string;
         market: string;
-        id: string;
         message?: string | undefined;
     }, {
         status: string;
+        id: string;
         coin: string;
         market: string;
-        id: string;
         message?: string | undefined;
         amount?: unknown;
         rate?: unknown;
@@ -421,18 +421,18 @@ export declare const schemas: {
         updated: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
         status: string;
+        id: string;
+        coin: string;
         amount: number;
         rate: number;
         total: number;
-        coin: string;
-        id: string;
         newrate: number;
         updated: boolean;
         message?: string | undefined;
     }, {
         status: string;
-        coin: string;
         id: string;
+        coin: string;
         updated: boolean;
         message?: string | undefined;
         amount?: unknown;
@@ -454,18 +454,18 @@ export declare const schemas: {
         updated: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
         status: string;
+        id: string;
+        coin: string;
         amount: number;
         rate: number;
         total: number;
-        coin: string;
-        id: string;
         newrate: number;
         updated: boolean;
         message?: string | undefined;
     }, {
         status: string;
-        coin: string;
         id: string;
+        coin: string;
         updated: boolean;
         message?: string | undefined;
         amount?: unknown;
@@ -485,9 +485,9 @@ export declare const schemas: {
         rate: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodNumber>, number | null, unknown>>;
     }, "strip", z.ZodTypeAny, {
         status: string;
+        coin: string;
         amount: number;
         total: number;
-        coin: string;
         market: string;
         message?: string | undefined;
         rate?: number | null | undefined;
@@ -512,9 +512,9 @@ export declare const schemas: {
         rate: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodNumber>, number | null, unknown>>;
     }, "strip", z.ZodTypeAny, {
         status: string;
+        coin: string;
         amount: number;
         total: number;
-        coin: string;
         market: string;
         message?: string | undefined;
         rate?: number | null | undefined;
@@ -539,9 +539,9 @@ export declare const schemas: {
         rate: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodNumber>, number | null, unknown>>;
     }, "strip", z.ZodTypeAny, {
         status: string;
+        coin: string;
         amount: number;
         total: number;
-        coin: string;
         market: string;
         message?: string | undefined;
         rate?: number | null | undefined;
@@ -633,10 +633,10 @@ export declare const schemas: {
             coin: z.ZodString;
             market: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }, {
             coin: string;
@@ -652,10 +652,10 @@ export declare const schemas: {
             coin: z.ZodString;
             market: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }, {
             coin: string;
@@ -667,17 +667,17 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }[];
         sellorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market?: string | undefined;
         }[];
         message?: string | undefined;
@@ -719,10 +719,10 @@ export declare const schemas: {
             type: z.ZodOptional<z.ZodString>;
             otc: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -758,10 +758,10 @@ export declare const schemas: {
             type: z.ZodOptional<z.ZodString>;
             otc: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -785,10 +785,10 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -798,10 +798,10 @@ export declare const schemas: {
             otc?: boolean | undefined;
         }[];
         sellorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -935,17 +935,17 @@ export declare const schemas: {
             rate: z.ZodEffects<z.ZodNumber, number, unknown>;
             total: z.ZodEffects<z.ZodNumber, number, unknown>;
         }, "strip", z.ZodTypeAny, {
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }, {
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
@@ -960,17 +960,17 @@ export declare const schemas: {
             rate: z.ZodEffects<z.ZodNumber, number, unknown>;
             total: z.ZodEffects<z.ZodNumber, number, unknown>;
         }, "strip", z.ZodTypeAny, {
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }, {
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
@@ -979,39 +979,39 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }[];
         sellorders: {
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }[];
         message?: string | undefined;
     }, {
         status: string;
         buyorders: {
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
             total?: unknown;
         }[];
         sellorders: {
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
@@ -1034,17 +1034,17 @@ export declare const schemas: {
             type: z.ZodString;
         }, "strip", z.ZodTypeAny, {
             type: string;
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }, {
             type: string;
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
@@ -1059,17 +1059,17 @@ export declare const schemas: {
             type: z.ZodString;
         }, "strip", z.ZodTypeAny, {
             type: string;
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }, {
             type: string;
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
@@ -1078,20 +1078,20 @@ export declare const schemas: {
         status: string;
         buyorders: {
             type: string;
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }[];
         sellorders: {
             type: string;
+            id: string;
+            coin: string;
             amount: number;
             rate: number;
-            coin: string;
             market: string;
-            id: string;
             created: string;
         }[];
         message?: string | undefined;
@@ -1099,18 +1099,18 @@ export declare const schemas: {
         status: string;
         buyorders: {
             type: string;
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
         }[];
         sellorders: {
             type: string;
+            id: string;
             coin: string;
             market: string;
-            id: string;
             created: string;
             amount?: unknown;
             rate?: unknown;
@@ -1137,10 +1137,10 @@ export declare const schemas: {
             type: z.ZodOptional<z.ZodString>;
             otc: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1176,10 +1176,10 @@ export declare const schemas: {
             type: z.ZodOptional<z.ZodString>;
             otc: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1203,10 +1203,10 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1216,10 +1216,10 @@ export declare const schemas: {
             otc?: boolean | undefined;
         }[];
         sellorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1279,10 +1279,10 @@ export declare const schemas: {
             type: z.ZodOptional<z.ZodString>;
             otc: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1318,10 +1318,10 @@ export declare const schemas: {
             type: z.ZodOptional<z.ZodString>;
             otc: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1345,10 +1345,10 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         buyorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1358,10 +1358,10 @@ export declare const schemas: {
             otc?: boolean | undefined;
         }[];
         sellorders: {
+            coin: string;
             amount: number;
             rate: number;
             total: number;
-            coin: string;
             type?: string | undefined;
             market?: string | undefined;
             solddate?: string | undefined;
@@ -1414,9 +1414,9 @@ export declare const schemas: {
             aud: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodNumber>, number | null, unknown>>;
             sendfee: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodNumber>, number | null, unknown>>;
         }, "strip", z.ZodTypeAny, {
-            amount: number;
             coin: string;
             address: string;
+            amount: number;
             timestamp: string;
             aud?: number | null | undefined;
             sendfee?: number | null | undefined;
@@ -1436,9 +1436,9 @@ export declare const schemas: {
             aud: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodNumber>, number | null, unknown>>;
             from: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            amount: number;
             coin: string;
             address: string;
+            amount: number;
             timestamp: string;
             aud?: number | null | undefined;
             from?: string | undefined;
@@ -1453,17 +1453,17 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         sendtransactions: {
-            amount: number;
             coin: string;
             address: string;
+            amount: number;
             timestamp: string;
             aud?: number | null | undefined;
             sendfee?: number | null | undefined;
         }[];
         receivetransactions: {
-            amount: number;
             coin: string;
             address: string;
+            amount: number;
             timestamp: string;
             aud?: number | null | undefined;
             from?: string | undefined;
@@ -1610,8 +1610,8 @@ export declare const schemas: {
             audamount: z.ZodEffects<z.ZodNumber, number, unknown>;
             timestamp: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            amount: number;
             coin: string;
+            amount: number;
             timestamp: string;
             audamount: number;
         }, {
@@ -1623,8 +1623,8 @@ export declare const schemas: {
     }, "strip", z.ZodTypeAny, {
         status: string;
         payments: {
-            amount: number;
             coin: string;
+            amount: number;
             timestamp: string;
             audamount: number;
         }[];
