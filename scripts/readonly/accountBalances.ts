@@ -5,7 +5,7 @@
  * Requires: Read-Only API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -15,21 +15,25 @@ async function main() {
     },
   });
 
-  console.log('Fetching account balances...\n');
+  console.log("Fetching account balances...\n");
 
   const result = await client.readOnly.accountBalances();
 
   console.log(`Result: ${result.balances.length} balances`);
 
-  const nonZeroBalances = result.balances.filter(b => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0);
+  const nonZeroBalances = result.balances.filter(
+    (b) => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0,
+  );
 
   if (nonZeroBalances.length > 0) {
-    console.log('\nNon-zero balances:');
-    nonZeroBalances.forEach(balance => {
-      console.log(`  ${balance.asset}: free=${balance.free}, locked=${balance.locked}`);
+    console.log("\nNon-zero balances:");
+    nonZeroBalances.forEach((balance) => {
+      console.log(
+        `  ${balance.asset}: free=${balance.free}, locked=${balance.locked}`,
+      );
     });
   } else {
-    console.log('\nNo non-zero balances found');
+    console.log("\nNo non-zero balances found");
   }
 }
 

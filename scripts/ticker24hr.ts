@@ -4,19 +4,21 @@
  * Endpoint: GET /pubapi/v2/latest
  */
 
-import { CoinspotClient } from '../index';
+import { CoinspotClient } from "../index";
 
 async function main() {
   const client = new CoinspotClient();
 
-  console.log('Fetching 24hr ticker for all markets...\n');
+  console.log("Fetching 24hr ticker for all markets...\n");
 
   const result = await client.public.ticker24hr();
 
   console.log(`Received ${result.length} markets`);
-  console.log('\nSample (first 3):');
-  result.slice(0, 3).forEach(ticker => {
-    console.log(`  ${ticker.symbol}: last=${ticker.lastPrice}, bid=${ticker.bidPrice}, ask=${ticker.askPrice}`);
+  console.log("\nSample (first 3):");
+  result.slice(0, 3).forEach((ticker) => {
+    console.log(
+      `  ${ticker.symbol}: last=${ticker.lastPrice}, bid=${ticker.bidPrice}, ask=${ticker.askPrice}`,
+    );
   });
 }
 

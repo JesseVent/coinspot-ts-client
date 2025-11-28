@@ -164,7 +164,7 @@ Follow this template:
  * Requires: [Auth level]
  */
 
-import { CoinspotClient } from '../index';
+import { CoinspotClient } from "../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -172,13 +172,13 @@ async function main() {
   });
 
   // Parse arguments
-  const param = process.argv[2] || 'default';
+  const param = process.argv[2] || "default";
 
   console.log(`Doing something with ${param}...\n`);
 
   const result = await client.api.method(param);
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(result);
 }
 

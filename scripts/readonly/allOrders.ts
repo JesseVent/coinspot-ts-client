@@ -5,7 +5,7 @@
  * Requires: Read-Only API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -19,17 +19,25 @@ async function main() {
   const markettype = process.argv[3];
   const limit = process.argv[4] ? parseInt(process.argv[4]) : undefined;
 
-  console.log(`Fetching historical orders${cointype ? ` for ${cointype}` : ''}${markettype ? `/${markettype}` : ''}${limit ? ` (limit: ${limit})` : ''}...\n`);
+  console.log(
+    `Fetching historical orders${cointype ? ` for ${cointype}` : ""}${markettype ? `/${markettype}` : ""}${limit ? ` (limit: ${limit})` : ""}...\n`,
+  );
 
-  const result = await client.readOnly.allOrders({ cointype, markettype, limit });
+  const result = await client.readOnly.allOrders({
+    cointype,
+    markettype,
+    limit,
+  });
 
   console.log(`Result: ${result.length} orders`);
 
   if (result.length > 0) {
-    console.log('\nMost recent 10 orders:');
-    result.slice(0, 10).forEach(order => {
+    console.log("\nMost recent 10 orders:");
+    result.slice(0, 10).forEach((order) => {
       const date = new Date(order.time).toISOString();
-      console.log(`  ${order.symbol}: ${order.side} ${order.origQty} @ ${order.price} (${order.status}) - ${date}`);
+      console.log(
+        `  ${order.symbol}: ${order.side} ${order.origQty} @ ${order.price} (${order.status}) - ${date}`,
+      );
     });
   }
 }

@@ -5,7 +5,7 @@
  * Requires: Full Access API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -15,13 +15,13 @@ async function main() {
     },
   });
 
-  console.log('Fetching account status...\n');
+  console.log("Fetching account status...\n");
 
   const result = await client.fullAccess.account();
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Status: ${result.status}`);
-  console.log(`  Message: ${result.message || 'N/A'}`);
+  console.log(`  Message: ${result.message || "N/A"}`);
   console.log(`  Can Trade: ${result.canTrade}`);
   console.log(`  Can Withdraw: ${result.canWithdraw}`);
   console.log(`  Can Deposit: ${result.canDeposit}`);

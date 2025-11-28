@@ -10,9 +10,9 @@ const statusMessageSchema = statusBaseSchema.extend({
     message: zod_1.z.string().optional(),
 });
 const numLike = zod_1.z.preprocess((val) => {
-    if (val === 'NaN')
+    if (val === "NaN")
         return null;
-    if (typeof val === 'string') {
+    if (typeof val === "string") {
         const n = Number(val);
         return Number.isNaN(n) ? val : n;
     }
@@ -81,11 +81,13 @@ const accountSchema = statusMessageSchema.extend({
     canDeposit: zod_1.z.boolean(),
     updateTime: zod_1.z.number().optional(),
     accountType: zod_1.z.string().optional(),
-    balances: zod_1.z.array(zod_1.z.object({
+    balances: zod_1.z
+        .array(zod_1.z.object({
         asset: zod_1.z.string(),
         free: zod_1.z.string(),
         locked: zod_1.z.string(),
-    })).optional(),
+    }))
+        .optional(),
 });
 const capitalDepositAddressSchema = statusMessageSchema.extend({
     coin: zod_1.z.string().optional(),
@@ -142,12 +144,14 @@ const orderExecutionSchema = statusMessageSchema.extend({
     timeInForce: zod_1.z.string().optional(),
     type: zod_1.z.string().optional(),
     side: zod_1.z.string(),
-    fills: zod_1.z.array(zod_1.z.object({
+    fills: zod_1.z
+        .array(zod_1.z.object({
         price: zod_1.z.string(),
         qty: zod_1.z.string(),
         commission: zod_1.z.string().optional(),
         commissionAsset: zod_1.z.string().optional(),
-    })).optional(),
+    }))
+        .optional(),
 });
 const cancelOrderSchema = statusMessageSchema.extend({
     symbol: zod_1.z.string().optional(),

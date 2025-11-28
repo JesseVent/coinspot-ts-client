@@ -5,7 +5,7 @@
  * Requires: Full Access API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -18,7 +18,7 @@ async function main() {
   const orderId = process.argv[2];
 
   if (!orderId) {
-    console.error('Usage: tsx cancelOrderBuy.ts <orderId>');
+    console.error("Usage: tsx cancelOrderBuy.ts <orderId>");
     process.exit(1);
   }
 
@@ -26,10 +26,10 @@ async function main() {
 
   const result = await client.fullAccess.cancelOrderBuy(orderId);
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Status: ${result.status}`);
-  console.log(`  Message: ${result.message || 'N/A'}`);
-  console.log(`  Order ID: ${result.orderId || 'N/A'}`);
+  console.log(`  Message: ${result.message || "N/A"}`);
+  console.log(`  Order ID: ${result.orderId || "N/A"}`);
 }
 
 main().catch(console.error);

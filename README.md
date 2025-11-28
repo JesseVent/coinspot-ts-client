@@ -21,16 +21,19 @@ pnpm add coinspot-ts-client
 This integration adds Binance Spot API compatibility to the existing CoinSpot client without modifying any original files.
 
 ### Core Files (to be added):
+
 - `binance-schemas.ts` - Binance-compatible Zod schemas
-- `binance-wrapper.ts` - BinanceClient wrapper class  
+- `binance-wrapper.ts` - BinanceClient wrapper class
 - `BINANCE_WRAPPER.md` - Complete documentation
 
 ### Scripts (to be added in scripts/binance/):
+
 - Public API scripts (no auth): getTicker24hr, getAvgPrice, getDepth, getTrades
 - Trading scripts: createOrderBuy, getAccount
 - Account scripts: getAccountBalances, getOpenMarketOrders
 
 ### Documentation:
+
 - `BINANCE_WRAPPER.md` - Usage guide
 - `IMPLEMENTATION_SUMMARY.md` - Technical details
 - `scripts/binance/README.md` - Script documentation
@@ -61,7 +64,8 @@ await bn.public.ticker24hr(); // Same data, Binance format
 ## Next Steps
 
 To complete the integration:
-1. Add remaining files from implementation  
+
+1. Add remaining files from implementation
 2. Update index.ts to export BinanceClient
 3. Build and test
 4. Push to repository
@@ -73,18 +77,24 @@ See IMPLEMENTATION_SUMMARY.md (when added) for complete technical details.
 ### Using CoinspotClient
 
 ```ts
-import { CoinspotClient } from 'coinspot-ts-client';
+import { CoinspotClient } from "coinspot-ts-client";
 
 const client = new CoinspotClient({
-  fullAccess: { key: process.env.COINSPOT_KEY!, secret: process.env.COINSPOT_SECRET! },
-  readOnly: { key: process.env.COINSPOT_RO_KEY!, secret: process.env.COINSPOT_RO_SECRET! }, // optional; falls back to fullAccess if omitted
+  fullAccess: {
+    key: process.env.COINSPOT_KEY!,
+    secret: process.env.COINSPOT_SECRET!,
+  },
+  readOnly: {
+    key: process.env.COINSPOT_RO_KEY!,
+    secret: process.env.COINSPOT_RO_SECRET!,
+  }, // optional; falls back to fullAccess if omitted
   rateLimit: { maxRequests: 995, perSeconds: 60 }, // optional
 });
 
 async function run() {
   const prices = await client.public.ticker24hr();
   const balances = await client.readOnly.accountBalances();
-  const buyQuote = await client.fullAccess.orderQuoteBuy('BTC', 100, 'aud');
+  const buyQuote = await client.fullAccess.orderQuoteBuy("BTC", 100, "aud");
   console.log(prices, balances, buyQuote);
 }
 ```
@@ -94,18 +104,24 @@ async function run() {
 If you prefer a wrapped client pattern, `WrappedClient` provides an identical interface to `CoinspotClient`:
 
 ```ts
-import { WrappedClient } from 'coinspot-ts-client';
+import { WrappedClient } from "coinspot-ts-client";
 
 const client = new WrappedClient({
-  fullAccess: { key: process.env.COINSPOT_KEY!, secret: process.env.COINSPOT_SECRET! },
-  readOnly: { key: process.env.COINSPOT_RO_KEY!, secret: process.env.COINSPOT_RO_SECRET! },
+  fullAccess: {
+    key: process.env.COINSPOT_KEY!,
+    secret: process.env.COINSPOT_SECRET!,
+  },
+  readOnly: {
+    key: process.env.COINSPOT_RO_KEY!,
+    secret: process.env.COINSPOT_RO_SECRET!,
+  },
 });
 
 async function run() {
   // Same methods as CoinspotClient - just an alternative entry point
   const ticker = await client.public.ticker24hr();
-  const depth = await client.public.depth('BTC');
-  const trades = await client.public.trades('ETH');
+  const depth = await client.public.depth("BTC");
+  const trades = await client.public.trades("ETH");
   console.log(ticker, depth, trades);
 }
 ```
@@ -141,17 +157,21 @@ The public API provides access to market data without authentication:
 The full access API provides trading functionality and requires authentication:
 
 #### Account Methods
+
 - `account()` - Get account status and information
 
 #### Deposit & Withdrawal Methods
+
 - `capitalDepositAddress(cointype)` - Get deposit address for a coin type
 
 #### Order Quote Methods
+
 - `orderQuoteBuy(cointype, amount, amounttype)` - Get quote for buying
 - `orderQuoteSell(cointype, amount, amounttype)` - Get quote for selling
 - `orderQuoteSwap(cointypesell, cointypebuy, amount)` - Get quote for swapping
 
 #### Order Placement Methods
+
 - `createOrderBuy(params)` - Create a buy order
 - `updateOrderBuy(params)` - Update an existing buy order
 - `orderMarketBuyNow(params)` - Place a market buy order
@@ -161,12 +181,14 @@ The full access API provides trading functionality and requires authentication:
 - `orderSwapNow(params)` - Place a swap order
 
 #### Order Cancellation Methods
+
 - `cancelOrderBuy(id)` - Cancel a buy order
 - `cancelOpenOrdersBuy(params?)` - Cancel all buy orders
 - `cancelOrderSell(id)` - Cancel a sell order
 - `cancelOpenOrdersSell(params?)` - Cancel all sell orders
 
 #### Withdrawal Methods
+
 - `withdrawDetails(params)` - Get withdrawal details for a coin type
 - `withdraw(params)` - Submit a withdrawal request
 
@@ -175,11 +197,13 @@ The full access API provides trading functionality and requires authentication:
 The read-only API provides account and transaction history without trading permissions:
 
 #### Account Methods
+
 - `account()` - Get account status and information
 - `accountBalances()` - Get all account balances
 - `assetBalance(params)` - Get balance for a specific asset
 
 #### Order Methods
+
 - `marketDepth(params)` - Get market order book depth
 - `openMarketOrders(params)` - Get open market orders
 - `openLimitOrders(params)` - Get open limit orders
@@ -187,6 +211,7 @@ The read-only API provides account and transaction history without trading permi
 - `allMarketOrders(params)` - Get all historical market orders
 
 #### Transaction History Methods
+
 - `marketTrades(params)` - Get market trades with fees
 - `transferHistory(params)` - Get send/receive history
 - `fiatDepositHistory(params)` - Get fiat deposit history
@@ -197,6 +222,7 @@ The read-only API provides account and transaction history without trading permi
 ## API Endpoints Mapping
 
 ### Public API Endpoints
+
 - `GET /pubapi/v2/latest` → `client.public.ticker24hr()`
 - `GET /pubapi/v2/latest/{cointype}` → `client.public.ticker24hrForSymbol(symbol)`
 - `GET /pubapi/v2/latest/{cointype}/{markettype}` → `client.public.ticker24hrForMarket(symbol, quote)`
@@ -212,6 +238,7 @@ The read-only API provides account and transaction history without trading permi
 - `GET /pubapi/v2/orders/summary/completed/{cointype}/{markettype}` → `client.public.aggTradesForMarket(symbol, quote)`
 
 ### Full Access API Endpoints
+
 - `POST /api/v2/status` → `client.fullAccess.account()`
 - `POST /api/v2/my/coin/deposit` → `client.fullAccess.capitalDepositAddress(cointype)`
 - `POST /api/v2/quote/buy/now` → `client.fullAccess.orderQuoteBuy(cointype, amount, amounttype)`
@@ -232,6 +259,7 @@ The read-only API provides account and transaction history without trading permi
 - `POST /api/v2/my/coin/withdraw/send` → `client.fullAccess.withdraw(params)`
 
 ### Read-Only API Endpoints
+
 - `POST /api/v2/ro/status` → `client.readOnly.account()`
 - `POST /api/v2/ro/orders/market/open` → `client.readOnly.marketDepth(params)`
 - `POST /api/v2/ro/orders/market/completed` → `client.readOnly.marketTrades(params)`
@@ -252,6 +280,7 @@ The read-only API provides account and transaction history without trading permi
 The client includes a schema-normalizer module that provides utilities to map CoinSpot API responses to Binance-like shapes for use with generic adapters. This is particularly useful when integrating with systems built for Binance's API format.
 
 Available normalization functions:
+
 - `toBinanceDepth()` - Maps CoinSpot depth responses to Binance depth format
 - `toBinanceTrades()` - Maps CoinSpot trade responses to Binance recent trades format
 - `toBinanceAggTrades()` - Maps CoinSpot trade responses to Binance aggregate trades format

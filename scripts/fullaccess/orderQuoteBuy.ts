@@ -5,7 +5,7 @@
  * Requires: Full Access API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -15,18 +15,24 @@ async function main() {
     },
   });
 
-  const cointype = process.argv[2] || 'BTC';
-  const amount = parseFloat(process.argv[3] || '100');
-  const amounttype = (process.argv[4] || 'aud') as 'coin' | 'aud';
+  const cointype = process.argv[2] || "BTC";
+  const amount = parseFloat(process.argv[3] || "100");
+  const amounttype = (process.argv[4] || "aud") as "coin" | "aud";
 
-  console.log(`Getting buy quote for ${amount} ${amounttype} of ${cointype}...\n`);
+  console.log(
+    `Getting buy quote for ${amount} ${amounttype} of ${cointype}...\n`,
+  );
 
-  const result = await client.fullAccess.orderQuoteBuy(cointype, amount, amounttype);
+  const result = await client.fullAccess.orderQuoteBuy(
+    cointype,
+    amount,
+    amounttype,
+  );
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Status: ${result.status}`);
   console.log(`  Price: ${result.price}`);
-  console.log(`  Message: ${result.message || 'N/A'}`);
+  console.log(`  Message: ${result.message || "N/A"}`);
 }
 
 main().catch(console.error);

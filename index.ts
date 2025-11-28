@@ -11,4 +11,4 @@ export {
   BinancePublicApi,
   BinanceFullAccessApi,
   BinanceReadOnlyApi,
-} from './binance-wrapper';
+} from "./binance-wrapper";

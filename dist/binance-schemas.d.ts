@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 export declare const schemas: {
     ticker24hr: z.ZodArray<z.ZodObject<{
         symbol: z.ZodString;

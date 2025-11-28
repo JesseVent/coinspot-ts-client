@@ -5,7 +5,7 @@
  * Requires: Full Access API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -15,12 +15,14 @@ async function main() {
     },
   });
 
-  const cointype = process.argv[2] || 'BTC';
-  const amount = parseFloat(process.argv[3] || '0.001');
-  const rate = parseFloat(process.argv[4] || '50000');
+  const cointype = process.argv[2] || "BTC";
+  const amount = parseFloat(process.argv[3] || "0.001");
+  const rate = parseFloat(process.argv[4] || "50000");
   const markettype = process.argv[5];
 
-  console.log(`Creating buy order: ${amount} ${cointype} @ ${rate}${markettype ? ` (${markettype})` : ''}...\n`);
+  console.log(
+    `Creating buy order: ${amount} ${cointype} @ ${rate}${markettype ? ` (${markettype})` : ""}...\n`,
+  );
 
   const result = await client.fullAccess.createOrderBuy({
     cointype,
@@ -29,7 +31,7 @@ async function main() {
     markettype,
   });
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Status: ${result.status}`);
   console.log(`  Symbol: ${result.symbol}`);
   console.log(`  Order ID: ${result.orderId}`);

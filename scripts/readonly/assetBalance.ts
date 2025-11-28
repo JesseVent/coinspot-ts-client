@@ -5,7 +5,7 @@
  * Requires: Read-Only API key
  */
 
-import { CoinspotClient } from '../../index';
+import { CoinspotClient } from "../../index";
 
 async function main() {
   const client = new CoinspotClient({
@@ -15,14 +15,16 @@ async function main() {
     },
   });
 
-  const cointype = process.argv[2] || 'BTC';
-  const available = process.argv[3] === 'true';
+  const cointype = process.argv[2] || "BTC";
+  const available = process.argv[3] === "true";
 
-  console.log(`Fetching ${cointype} balance${available ? ' (available only)' : ''}...\n`);
+  console.log(
+    `Fetching ${cointype} balance${available ? " (available only)" : ""}...\n`,
+  );
 
   const result = await client.readOnly.assetBalance({ cointype, available });
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Asset: ${result.asset}`);
   console.log(`  Free: ${result.free}`);
   console.log(`  Locked: ${result.locked}`);

@@ -4,17 +4,17 @@
  * Endpoint: GET /pubapi/v2/buyprice/{cointype}
  */
 
-import { CoinspotClient } from '../index';
+import { CoinspotClient } from "../index";
 
 async function main() {
   const client = new CoinspotClient();
-  const symbol = process.argv[2] || 'BTC';
+  const symbol = process.argv[2] || "BTC";
 
   console.log(`Fetching average buy price for ${symbol}...\n`);
 
   const result = await client.public.avgPrice(symbol);
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Price: ${result.price}`);
 }
 

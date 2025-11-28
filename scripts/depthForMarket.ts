@@ -4,18 +4,18 @@
  * Endpoint: GET /pubapi/v2/orders/open/{cointype}/{markettype}
  */
 
-import { CoinspotClient } from '../index';
+import { CoinspotClient } from "../index";
 
 async function main() {
   const client = new CoinspotClient();
-  const symbol = process.argv[2] || 'BTC';
-  const quote = process.argv[3] || 'USDT';
+  const symbol = process.argv[2] || "BTC";
+  const quote = process.argv[3] || "USDT";
 
   console.log(`Fetching order book depth for ${symbol}/${quote}...\n`);
 
   const result = await client.public.depthForMarket(symbol, quote);
 
-  console.log('Result:');
+  console.log("Result:");
   console.log(`  Last Update ID: ${result.lastUpdateId}`);
   console.log(`  Bids: ${result.bids.length} levels`);
   console.log(`  Asks: ${result.asks.length} levels`);

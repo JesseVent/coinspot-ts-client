@@ -7,7 +7,7 @@
  * to those methods for consistency.
  */
 
-import { CoinspotClient, CoinspotClientOptions } from './client';
+import { CoinspotClient, CoinspotClientOptions } from "./client";
 
 /**
  * Wrapped client that delegates to CoinspotClient
@@ -32,16 +32,16 @@ export class WrappedClient {
 }
 
 // Re-export the API classes for convenience
-export { CoinspotPublicApi as WrappedPublicApi } from './client';
-export { CoinspotFullAccessApi as WrappedFullAccessApi } from './client';
-export { CoinspotReadOnlyApi as WrappedReadOnlyApi } from './client';
+export { CoinspotPublicApi as WrappedPublicApi } from "./client";
+export { CoinspotFullAccessApi as WrappedFullAccessApi } from "./client";
+export { CoinspotReadOnlyApi as WrappedReadOnlyApi } from "./client";
 
 // Legacy exports for backward compatibility (deprecated)
 /** @deprecated Use WrappedClient instead */
 export { WrappedClient as BinanceClient };
 /** @deprecated Use WrappedPublicApi instead */
-export { CoinspotPublicApi as BinancePublicApi } from './client';
+export { CoinspotPublicApi as BinancePublicApi } from "./client";
 /** @deprecated Use WrappedFullAccessApi instead */
-export { CoinspotFullAccessApi as BinanceFullAccessApi } from './client';
+export { CoinspotFullAccessApi as BinanceFullAccessApi } from "./client";
 /** @deprecated Use WrappedReadOnlyApi instead */
-export { CoinspotReadOnlyApi as BinanceReadOnlyApi } from './client';
+export { CoinspotReadOnlyApi as BinanceReadOnlyApi } from "./client";
