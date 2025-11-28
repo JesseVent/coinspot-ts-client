@@ -17,7 +17,7 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 *.log.*
-
+dist/
 # Runtime data
 pids
 *.pid
@@ -97,7 +97,7 @@ generated/
 docs/api-samples/
 probe_output/
 AGENTS.md
-
+.claude
 docs/
 QWEN.md
 
