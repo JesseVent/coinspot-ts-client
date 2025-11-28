@@ -15,14 +15,19 @@ async function main() {
 
   const result = await client.public.tradesForMarket(symbol, quote);
 
-  console.log(`Result: ${result.length} trades`);
+  const allTrades = [...result.buyorders, ...result.sellorders];
+  console.log(
+    `Result: ${allTrades.length} trades (${result.buyorders.length} buys, ${result.sellorders.length} sells)`,
+  );
 
-  if (result.length > 0) {
+  if (allTrades.length > 0) {
     console.log("\nMost recent 5 trades:");
-    result.slice(0, 5).forEach((trade) => {
-      const date = new Date(trade.time).toISOString();
+    allTrades.slice(0, 5).forEach((trade) => {
+      const date = trade.solddate
+        ? new Date(trade.solddate).toISOString()
+        : "N/A";
       console.log(
-        `  ${date}: ${trade.qty} @ ${trade.price} (${trade.isBuyerMaker ? "sell" : "buy"})`,
+        `  ${date}: ${trade.amount} @ ${trade.rate} (total: ${trade.total})`,
       );
     });
   }

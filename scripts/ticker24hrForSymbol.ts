@@ -15,10 +15,10 @@ async function main() {
   const result = await client.public.ticker24hrForSymbol(symbol);
 
   console.log("Result:");
-  console.log(`  Symbol: ${result.symbol}`);
-  console.log(`  Last Price: ${result.lastPrice}`);
-  console.log(`  Bid Price: ${result.bidPrice}`);
-  console.log(`  Ask Price: ${result.askPrice}`);
+  console.log(`  Symbol: ${symbol}`);
+  console.log(`  Last Price: ${result.prices.last}`);
+  console.log(`  Bid Price: ${result.prices.bid}`);
+  console.log(`  Ask Price: ${result.prices.ask}`);
 }
 
 main().catch(console.error);

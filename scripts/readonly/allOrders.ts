@@ -29,14 +29,19 @@ async function main() {
     limit,
   });
 
-  console.log(`Result: ${result.length} orders`);
+  const allOrders = [...result.buyorders, ...result.sellorders];
+  console.log(
+    `Result: ${allOrders.length} orders (${result.buyorders.length} buys, ${result.sellorders.length} sells)`,
+  );
 
-  if (result.length > 0) {
+  if (allOrders.length > 0) {
     console.log("\nMost recent 10 orders:");
-    result.slice(0, 10).forEach((order) => {
-      const date = new Date(order.time).toISOString();
+    allOrders.slice(0, 10).forEach((order) => {
+      const date = order.solddate
+        ? new Date(order.solddate).toISOString()
+        : "N/A";
       console.log(
-        `  ${order.symbol}: ${order.side} ${order.origQty} @ ${order.price} (${order.status}) - ${date}`,
+        `  ${order.coin}/${order.market || "AUD"}: ${order.amount} @ ${order.rate} (total: ${order.total}) - ${date}`,
       );
     });
   }

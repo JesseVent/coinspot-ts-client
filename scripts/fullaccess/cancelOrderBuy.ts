@@ -29,7 +29,6 @@ async function main() {
   console.log("Result:");
   console.log(`  Status: ${result.status}`);
   console.log(`  Message: ${result.message || "N/A"}`);
-  console.log(`  Order ID: ${result.orderId || "N/A"}`);
 }
 
 main().catch(console.error);

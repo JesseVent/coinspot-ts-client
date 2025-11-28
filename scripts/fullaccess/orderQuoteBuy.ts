@@ -31,7 +31,7 @@ async function main() {
 
   console.log("Result:");
   console.log(`  Status: ${result.status}`);
-  console.log(`  Price: ${result.price}`);
+  console.log(`  Rate: ${result.rate}`);
   console.log(`  Message: ${result.message || "N/A"}`);
 }
 

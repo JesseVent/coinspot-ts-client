@@ -27,14 +27,17 @@ async function main() {
     markettype,
   });
 
-  console.log(`Result: ${result.length} open orders`);
+  const allOrders = [...result.buyorders, ...result.sellorders];
+  console.log(
+    `Result: ${allOrders.length} open orders (${result.buyorders.length} buys, ${result.sellorders.length} sells)`,
+  );
 
-  if (result.length > 0) {
+  if (allOrders.length > 0) {
     console.log("\nOpen orders:");
-    result.forEach((order) => {
-      const date = new Date(order.time).toISOString();
+    allOrders.forEach((order) => {
+      const date = new Date(order.created).toISOString();
       console.log(
-        `  [${order.orderId}] ${order.symbol}: ${order.side} ${order.origQty} @ ${order.price} (${order.status}) - ${date}`,
+        `  [${order.id}] ${order.coin}/${order.market}: ${order.amount} @ ${order.rate} (total: ${order.total}) - ${date}`,
       );
     });
   }

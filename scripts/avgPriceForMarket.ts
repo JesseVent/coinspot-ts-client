@@ -16,7 +16,7 @@ async function main() {
   const result = await client.public.avgPriceForMarket(symbol, quote);
 
   console.log("Result:");
-  console.log(`  Price: ${result.price}`);
+  console.log(`  Price: ${result.rate}`);
 }
 
 main().catch(console.error);

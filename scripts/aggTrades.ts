@@ -14,13 +14,14 @@ async function main() {
 
   const result = await client.public.aggTrades(symbol);
 
-  console.log(`Result: ${result.length} aggregated trades`);
+  console.log(`Result: ${result.orders.length} aggregated trades`);
 
-  if (result.length > 0) {
+  if (result.orders.length > 0) {
     console.log("\nMost recent 5 aggregated trades:");
-    result.slice(0, 5).forEach((trade) => {
-      const date = new Date(trade.T).toISOString();
-      console.log(`  ${date}: ${trade.q} @ ${trade.p} (agg ID: ${trade.a})`);
+    result.orders.slice(0, 5).forEach((trade) => {
+      console.log(
+        `  ${trade.coin}: ${trade.amount} @ ${trade.rate} (total: ${trade.total})`,
+      );
     });
   }
 }

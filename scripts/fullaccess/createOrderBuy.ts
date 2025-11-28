@@ -33,11 +33,11 @@ async function main() {
 
   console.log("Result:");
   console.log(`  Status: ${result.status}`);
-  console.log(`  Symbol: ${result.symbol}`);
-  console.log(`  Order ID: ${result.orderId}`);
-  console.log(`  Price: ${result.price}`);
-  console.log(`  Quantity: ${result.origQty}`);
-  console.log(`  Side: ${result.side}`);
+  console.log(`  Order ID: ${result.id}`);
+  console.log(`  Coin: ${result.coin}`);
+  console.log(`  Market: ${result.market}`);
+  console.log(`  Amount: ${result.amount}`);
+  console.log(`  Rate: ${result.rate}`);
 }
 
 main().catch(console.error);

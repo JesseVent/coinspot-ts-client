@@ -13,11 +13,12 @@ async function main() {
 
   const result = await client.public.ticker24hr();
 
-  console.log(`Received ${result.length} markets`);
+  const entries = Object.entries(result.prices);
+  console.log(`Received ${entries.length} markets`);
   console.log("\nSample (first 3):");
-  result.slice(0, 3).forEach((ticker) => {
+  entries.slice(0, 3).forEach(([symbol, prices]) => {
     console.log(
-      `  ${ticker.symbol}: last=${ticker.lastPrice}, bid=${ticker.bidPrice}, ask=${ticker.askPrice}`,
+      `  ${symbol}: last=${prices.last}, bid=${prices.bid}, ask=${prices.ask}`,
     );
   });
 }

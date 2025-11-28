@@ -21,10 +21,6 @@ async function main() {
 
   console.log("Result:");
   console.log(`  Status: ${result.status}`);
-  console.log(`  Message: ${result.message || "N/A"}`);
-  console.log(`  Can Trade: ${result.canTrade}`);
-  console.log(`  Can Withdraw: ${result.canWithdraw}`);
-  console.log(`  Can Deposit: ${result.canDeposit}`);
 }
 
 main().catch(console.error);

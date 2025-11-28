@@ -24,10 +24,22 @@ async function main() {
 
   const result = await client.readOnly.assetBalance({ cointype, available });
 
-  console.log("Result:");
-  console.log(`  Asset: ${result.asset}`);
-  console.log(`  Free: ${result.free}`);
-  console.log(`  Locked: ${result.locked}`);
+  // result.balance is a Record<string, balanceEntry>
+  const balanceEntry = result.balance[cointype];
+
+  if (balanceEntry) {
+    const availableAmount = balanceEntry.available ?? balanceEntry.balance;
+    const locked = balanceEntry.balance - availableAmount;
+
+    console.log("Result:");
+    console.log(`  Asset: ${cointype}`);
+    console.log(`  Balance: ${balanceEntry.balance}`);
+    console.log(`  Available: ${availableAmount}`);
+    console.log(`  Locked: ${locked}`);
+    console.log(`  AUD Balance: ${balanceEntry.audbalance}`);
+  } else {
+    console.log(`No balance found for ${cointype}`);
+  }
 }
 
 main().catch(console.error);

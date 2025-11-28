@@ -16,21 +16,24 @@ async function main() {
   const result = await client.public.depthForMarket(symbol, quote);
 
   console.log("Result:");
-  console.log(`  Last Update ID: ${result.lastUpdateId}`);
-  console.log(`  Bids: ${result.bids.length} levels`);
-  console.log(`  Asks: ${result.asks.length} levels`);
+  console.log(`  Buy Orders: ${result.buyorders.length} levels`);
+  console.log(`  Sell Orders: ${result.sellorders.length} levels`);
 
-  if (result.bids.length > 0) {
-    console.log(`\n  Top 3 Bids:`);
-    result.bids.slice(0, 3).forEach(([price, qty]) => {
-      console.log(`    ${price} @ ${qty}`);
+  if (result.buyorders.length > 0) {
+    console.log(`\n  Top 3 Buy Orders:`);
+    result.buyorders.slice(0, 3).forEach((order) => {
+      console.log(
+        `    ${order.rate} @ ${order.amount} (total: ${order.total})`,
+      );
     });
   }
 
-  if (result.asks.length > 0) {
-    console.log(`\n  Top 3 Asks:`);
-    result.asks.slice(0, 3).forEach(([price, qty]) => {
-      console.log(`    ${price} @ ${qty}`);
+  if (result.sellorders.length > 0) {
+    console.log(`\n  Top 3 Sell Orders:`);
+    result.sellorders.slice(0, 3).forEach((order) => {
+      console.log(
+        `    ${order.rate} @ ${order.amount} (total: ${order.total})`,
+      );
     });
   }
 }
